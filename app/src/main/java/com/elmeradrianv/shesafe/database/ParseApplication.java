@@ -4,20 +4,20 @@ import android.app.Application;
 
 import com.elmeradrianv.shesafe.BuildConfig;
 import com.parse.Parse;
-import com.parse.ParseObject;
+
 
 public class ParseApplication extends Application {
 
-    private static final String applicationId= BuildConfig.PARSE_APP_ID;
-    private static final String clientKey = BuildConfig.PARSE_CLIENT_KEY;
-    private static final String server = "https://parseapi.back4app.com/";
+    private static final String APPLICATION_ID= BuildConfig.PARSE_APP_ID;
+    private static final String CLIENTE_KEY = BuildConfig.PARSE_CLIENT_KEY;
+    private static final String SERVER = "https://parseapi.back4app.com/";
     @Override
     public void onCreate() {
         super.onCreate();
         Parse.initialize(new Parse.Configuration.Builder(this)
-                .applicationId(applicationId)
-                .clientKey(clientKey)
-                .server(server).build());
+                .applicationId(APPLICATION_ID)
+                .clientKey(CLIENTE_KEY)
+                .server(SERVER).build());
 
     }
 }

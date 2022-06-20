@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_she_safe_landscape.xml" value="0.182" />
         <entry key="app/src/main/res/layout/activity_launch.xml" value="0.15411376953125006" />
       </map>
     </option>

@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 public class LaunchActivity extends AppCompatActivity {
-    rivate static final int SPLASH_SCREEN_DURATION_MS = 2000;
+    private static final int SPLASH_SCREEN_DURATION_MS = 2000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

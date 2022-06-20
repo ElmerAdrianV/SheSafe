@@ -14,6 +14,7 @@ public class LaunchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launch);
         getSupportActionBar().hide();
 
+        //Launch Activity to show the welcome logo of the app
         new Handler().postDelayed(() -> {
             Intent intent = new Intent(LaunchActivity.this, LoginActivity.class);
             startActivity(intent);

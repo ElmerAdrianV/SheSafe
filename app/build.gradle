@@ -17,8 +17,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "CLIENT_KEY", apikeyProperties['PARSE_CLIENT_KEY'])
-        buildConfigField("String", "APP_ID", apikeyProperties['PARSE_APP_ID'])
+        buildConfigField("String", "PARSE_CLIENT_KEY", apikeyProperties['PARSE_CLIENT_KEY'])
+        buildConfigField("String", "PARSE_APP_ID", apikeyProperties['PARSE_APP_ID'])
     }
 
     buildTypes {

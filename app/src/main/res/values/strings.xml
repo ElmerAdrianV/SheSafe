@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">SheSafe</string>
     <string name="she_safe_logo_in_landscape">She Safe logo in landscape</string>
+    <string name="password">password</string>
+    <string name="login">login</string>
+    <string name="username">username</string>
+    <string name="sign_up">sign up</string>
+    <string name="or">or</string>
 </resources>

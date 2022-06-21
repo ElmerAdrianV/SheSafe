@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //To hide the action bar in appcompact activity
         getSupportActionBar().hide();
-
+        //Need implement the logout button
         if(ParseUser.getCurrentUser()!=null){
             goMainActivity();
         }
@@ -59,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        Log.i(TAG, "User login successfully" );
         finish();
     }
 

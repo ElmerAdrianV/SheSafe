@@ -19,7 +19,6 @@ public class LoginActivity extends AppCompatActivity {
         EditText etUsername;
         EditText etPassword;
         Button btnLogin;
-        //Button btnSignUp;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -27,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
         etUsername=findViewById(R.id.etUsername);
         etPassword=findViewById(R.id.etPassword);
         btnLogin=findViewById(R.id.btnLogin);
-        //btnSignUp=findViewById(R.id.btnSignUp);
+        Button btnSignUp=findViewById(R.id.btnSignUp);
 
         //To hide the action bar in appcompact activity
         getSupportActionBar().hide();
@@ -41,6 +40,10 @@ public class LoginActivity extends AppCompatActivity {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
             loginUser(username,password);
+        });
+        btnSignUp.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SignUpActivity.class);
+            startActivity(intent);
         });
 
     }

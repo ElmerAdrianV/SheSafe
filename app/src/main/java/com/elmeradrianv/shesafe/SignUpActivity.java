@@ -1,6 +1,8 @@
 package com.elmeradrianv.shesafe;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -11,8 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.elmeradrianv.shesafe.database.User;
+import com.parse.ParseUser;
 
 public class SignUpActivity extends AppCompatActivity {
+
+    private static final String TAG = SignUpActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +65,19 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
+        User user = new User();
+        user.setUsername(username);
 
+        user.setPassword(password);
+
+        user.signUpInBackground(e -> {
+            if (e != null) {
+                Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+            goMainActivity();
+        });
     }
 
     private void setImage(String url, ImageView imageView) {
@@ -71,5 +89,12 @@ public class SignUpActivity extends AppCompatActivity {
                         .transform(new RoundedCorners(radiusIP))
                 )
                 .into(imageView);
+    }
+    private void goMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        Log.i(TAG, "User signup successfully");
+        finish();
     }
 }

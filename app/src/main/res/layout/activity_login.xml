@@ -52,7 +52,7 @@
         android:textStyle="normal" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnAddProfilePhoto"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/etPassword"
@@ -79,7 +79,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btnLogin"
+        android:layout_below="@+id/btnAddProfilePhoto"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:text="@string/or"

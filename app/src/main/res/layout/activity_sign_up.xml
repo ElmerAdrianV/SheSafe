@@ -27,7 +27,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnAddProfilePhoto"
         android:layout_width="100dp"
         android:layout_height="45dp"
         android:layout_alignStart="@+id/etUsername"

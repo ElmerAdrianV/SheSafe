@@ -15,7 +15,7 @@ public class User extends ParseUser {
         return getString(PERSONAL_DESCRIPTION_KEY);
     }
 
-    void setPersonalDescription(String personalDescription) {
+    public void setPersonalDescription(String personalDescription) {
         put(PERSONAL_DESCRIPTION_KEY, personalDescription);
     }
     public ParseFile getProfilePhoto() {

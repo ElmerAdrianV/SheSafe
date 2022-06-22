@@ -6,17 +6,20 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.elmeradrianv.shesafe.database.User;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -93,42 +96,10 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Return the file target for the photo based on filename
         return new File(mediaStorageDir.getPath() + File.separator + fileName);
-
-
     }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
-        ParseUser user = new ParseUser();
-
-        if(PERSONALIZED_PHOTO_PICKED){
-            ImageView ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
-            File profilePhoto = getPhotoFileUri(ivProfilePhoto.getTag().toString());
-            ParseFile file = new ParseFile(profilePhoto);
-
-            file.saveInBackground((SaveCallback) e -> {
-                // If successful add file to user and signUpInBackground
-                if(e != null)
-                    Log.e(TAG, "done save profile image: ",e);
-                else
-                    user.put(User.PROFILE_PHOTO_KEY,file);
-            });
-
-        }
-        user.setUsername(username);
-        user.put(User.FIRST_NAME_KEY, firstName);
-        user.put(User.LAST_NAME_KEY, lastName);
-        user.setEmail(email);
-        user.put(User.PERSONAL_DESCRIPTION_KEY, personalDescription);
-        user.setPassword(password);
-        user.signUpInBackground(e -> {
-            if (e != null) {
-                Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "signupNewUser: Signup error", e);
-                return;
-            }
-            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
-            goMainActivity();
-        });
+            User.saveWithoutImage(this,username,firstName,lastName,email,personalDescription,password);
     }
 
     private void setBtnAddProfilePhoto(Button btnAddProfilePhoto) {
@@ -160,7 +131,9 @@ public class SignUpActivity extends AppCompatActivity {
             Uri photoUri = data.getData();
             // Load the selected image into a preview
             ImageView ivProfilePhoto =  findViewById(R.id.ivProfilePhoto);
-            ivProfilePhoto.setTag(photoUri.toString());
+            File photoFile = getPhotoFileUri(photoUri.toString());
+            Uri fileProvider = FileProvider.getUriForFile(this, "com.elmeradrianv.fileprovider.shesafe", photoFile);
+            ivProfilePhoto.setTag(fileProvider.toString());
             setImage(photoUri.toString(),ivProfilePhoto);
         }
     }

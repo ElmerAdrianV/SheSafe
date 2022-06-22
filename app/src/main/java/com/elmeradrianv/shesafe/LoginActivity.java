@@ -21,9 +21,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
         EditText etUsername = findViewById(R.id.etUsername);
-        EditText etPassword = findViewById(R.id.etPassword);
+        EditText etPassword = findViewById(R.id.etLastName);
         Button btnLogin = findViewById(R.id.btnLogin);
-
+        Button btnSignUp = findViewById(R.id.btnSignUp);
         //To hide the action bar in appcompact activity
         getSupportActionBar().hide();
         //Need implement the logout button
@@ -37,6 +37,11 @@ public class LoginActivity extends AppCompatActivity {
             String password = etPassword.getText().toString();
             loginUser(username, password);
         });
+
+        btnSignUp.setOnClickListener(v -> {
+            goSignUpActivity();
+        });
+
 
     }
 
@@ -58,5 +63,8 @@ public class LoginActivity extends AppCompatActivity {
         Log.i(TAG, "User login successfully");
         finish();
     }
-
+    private void goSignUpActivity() {
+        Intent intent = new Intent(this, SignUpActivity.class);
+        startActivity(intent);
+    }
 }

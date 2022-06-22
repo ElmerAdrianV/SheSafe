@@ -80,7 +80,9 @@ For She Safe, we identified the following “must-have” features which a user 
 
 ## Wireframes
 [Add picture of your hand sketched wireframes in this section]
-<img src="https://raw.githubusercontent.com/ElmerAdrianV/SheSafe/main/Wireframes.jpeg" width=600>
+
+<img src="https://raw.githubusercontent.com/ElmerAdrianV/SheSafe/master/Wireframes.jpeg" width=600>
+
 
 ### [BONUS] Digital Wireframes & Mockups
 

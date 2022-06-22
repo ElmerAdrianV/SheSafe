@@ -65,14 +65,17 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
-        User user = new User();
+        ParseUser user = new ParseUser();
         user.setUsername(username);
-
+        user.put(User.FIRST_NAME_KEY,firstName);
+        user.put(User.LAST_NAME_KEY,lastName);
+        user.setEmail(email);
+        user.put(User.PERSONAL_DESCRIPTION_KEY,personalDescription);
         user.setPassword(password);
-
         user.signUpInBackground(e -> {
             if (e != null) {
                 Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "signupNewUser: Signup error", e);
                 return;
             }
             Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();

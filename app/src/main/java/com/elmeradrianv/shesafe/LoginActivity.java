@@ -16,18 +16,14 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EditText etUsername;
-        EditText etPassword;
-        Button btnLogin;
-        //Button btnSignUp;
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
 
-        etUsername=findViewById(R.id.etUsername);
-        etPassword=findViewById(R.id.etPassword);
-        btnLogin=findViewById(R.id.btnLogin);
-        //btnSignUp=findViewById(R.id.btnSignUp);
+        EditText etUsername=findViewById(R.id.etUsername);
+        EditText etPassword=findViewById(R.id.etPassword);
+        Button btnLogin=findViewById(R.id.btnLogin);
 
         //To hide the action bar in appcompact activity
         getSupportActionBar().hide();

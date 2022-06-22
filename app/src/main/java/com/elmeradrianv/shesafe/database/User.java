@@ -22,7 +22,7 @@ public class User extends ParseUser {
     public static final String LAST_NAME_KEY = "lastName";
     public static final String TAG = User.class.getSimpleName();
 
-    public void saveWithoutImage(Context context, String username, String firstName, String lastName, String email, String personalDescription, String password) {
+    public static void saveWithoutImage(Context context, String username, String firstName, String lastName, String email, String personalDescription, String password) {
         ParseUser user = new ParseUser();
         user.setUsername(username);
         user.put(User.FIRST_NAME_KEY, firstName);
@@ -40,7 +40,7 @@ public class User extends ParseUser {
         });
     }
 
-    public void saveWithImage(Context context, File profilePhoto, String username, String firstName, String lastName, String email, String personalDescription, String password) {
+    public static void saveWithImage(Context context, File profilePhoto, String username, String firstName, String lastName, String email, String personalDescription, String password) {
         ParseUser user = new ParseUser();
         ParseFile file = new ParseFile(profilePhoto);
         file.saveInBackground((SaveCallback) e -> {

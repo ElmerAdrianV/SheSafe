@@ -15,5 +15,4 @@
         app:itemTextColor="@color/ss_pink"
         app:menu="@menu/menu_bottom_navigation" />
 
-
 </RelativeLayout>

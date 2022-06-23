@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.2575" />
         <entry key="app/src/main/res/drawable/ic_she_safe_landscape.xml" value="0.182" />
         <entry key="app/src/main/res/drawable/profile_button.xml" value="0.322" />
+        <entry key="app/src/main/res/drawable/table_button.xml" value="0.323" />
         <entry key="app/src/main/res/layout/activity_launch.xml" value="0.15411376953125006" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.9812774658203125" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.38504180908203134" />

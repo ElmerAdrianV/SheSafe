@@ -1,6 +1,7 @@
 package com.elmeradrianv.shesafe;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +19,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.elmeradrianv.shesafe.database.User;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.io.File;
 
@@ -28,6 +33,7 @@ public class SignUpActivity extends AppCompatActivity {
     public final static int PICK_PHOTO_CODE = 1046;
     private static final String TAG = SignUpActivity.class.getSimpleName();
     private static boolean PERSONALIZED_PHOTO_PICKED = false;
+    private ParseFile profilePhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +101,36 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
-        User.saveWithoutImage(this, username, firstName, lastName, email, personalDescription, password);
+        ParseUser user = new ParseUser();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.put(User.PERSONAL_DESCRIPTION_KEY, personalDescription);
+        user.put(User.FIRST_NAME_KEY, firstName);
+        user.put(User.LAST_NAME_KEY, lastName);
+        user.signUpInBackground(e2 -> {
+            if (e2 != null) {
+                Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "signupNewUser: Signup error", e2);
+                return;
+            }
+            if(PERSONALIZED_PHOTO_PICKED) {
+                user.put(User.PROFILE_PHOTO_KEY, profilePhoto);
+                user.saveInBackground((SaveCallback) e3 -> {
+                    if (e2 != null) {
+                        Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "signupNewUser: Signup error", e2);
+                        return;
+                    }
+                });
+                PERSONALIZED_PHOTO_PICKED=false;
+                profilePhoto=null;
+            }
+            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+        });
+
     }
+
 
     private void setBtnAddProfilePhoto(Button btnAddProfilePhoto) {
         btnAddProfilePhoto.setOnClickListener(v -> {
@@ -125,11 +159,17 @@ public class SignUpActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if ((data != null) && requestCode == PICK_PHOTO_CODE) {
             Uri photoUri = data.getData();
+
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+            Cursor cursor = this.getContentResolver().query(photoUri,filePathColumn, null, null, null);
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String mCurrentPhotoPath = cursor.getString(columnIndex);
+            cursor.close();
+            File image = new File(mCurrentPhotoPath);
+            profilePhoto = new ParseFile(image);
             // Load the selected image into a preview
             ImageView ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
-            File photoFile = getPhotoFileUri(photoUri.toString());
-            Uri fileProvider = FileProvider.getUriForFile(this, "com.elmeradrianv.fileprovider.shesafe", photoFile);
-            ivProfilePhoto.setTag(fileProvider.toString());
             setImage(photoUri.toString(), ivProfilePhoto);
         }
     }

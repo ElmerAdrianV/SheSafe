@@ -63,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.i(TAG, "User login successfully");
         finish();
     }
+
     private void goSignUpActivity() {
         Intent intent = new Intent(this, SignUpActivity.class);
         startActivity(intent);

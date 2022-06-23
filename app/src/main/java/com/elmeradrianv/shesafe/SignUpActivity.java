@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,20 +18,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.elmeradrianv.shesafe.database.User;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.io.File;
 
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private static final String TAG = SignUpActivity.class.getSimpleName();
     // PICK_PHOTO_CODE is a constant integer
     public final static int PICK_PHOTO_CODE = 1046;
+    private static final String TAG = SignUpActivity.class.getSimpleName();
     private static boolean PERSONALIZED_PHOTO_PICKED = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +51,6 @@ public class SignUpActivity extends AppCompatActivity {
         setImage("", ivProfilePhoto);
         setupBtnSignUp(btnSignUp, etUsername, etFirstName, etLastName, etEmail, etPersonalDescription, etPassword, etPasswordConfirm);
         setBtnAddProfilePhoto(btnAddProfilePhoto);
-
 
 
     }
@@ -82,6 +77,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         });
     }
+
     // Returns the File for a photo stored on disk given the fileName
     public File getPhotoFileUri(String fileName) {
         // Get safe storage directory for photos
@@ -90,7 +86,7 @@ public class SignUpActivity extends AppCompatActivity {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.d(TAG, "failed to create directory");
         }
 
@@ -99,7 +95,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
-            User.saveWithoutImage(this,username,firstName,lastName,email,personalDescription,password);
+        User.saveWithoutImage(this, username, firstName, lastName, email, personalDescription, password);
     }
 
     private void setBtnAddProfilePhoto(Button btnAddProfilePhoto) {
@@ -120,7 +116,7 @@ public class SignUpActivity extends AppCompatActivity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             // Bring up gallery to select a photo
             startActivityForResult(intent, PICK_PHOTO_CODE);
-            PERSONALIZED_PHOTO_PICKED=true;
+            PERSONALIZED_PHOTO_PICKED = true;
         }
     }
 
@@ -130,11 +126,11 @@ public class SignUpActivity extends AppCompatActivity {
         if ((data != null) && requestCode == PICK_PHOTO_CODE) {
             Uri photoUri = data.getData();
             // Load the selected image into a preview
-            ImageView ivProfilePhoto =  findViewById(R.id.ivProfilePhoto);
+            ImageView ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
             File photoFile = getPhotoFileUri(photoUri.toString());
             Uri fileProvider = FileProvider.getUriForFile(this, "com.elmeradrianv.fileprovider.shesafe", photoFile);
             ivProfilePhoto.setTag(fileProvider.toString());
-            setImage(photoUri.toString(),ivProfilePhoto);
+            setImage(photoUri.toString(), ivProfilePhoto);
         }
     }
 

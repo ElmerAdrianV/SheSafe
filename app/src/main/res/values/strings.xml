@@ -12,4 +12,7 @@
     <string name="email">Email</string>
     <string name="personal_description">Personal Description</string>
     <string name="confirm_your_password">Confirm your password</string>
+    <string name="she_safe_map">She Safe Map</string>
+    <string name="your_profile">Your profile</string>
+    <string name="table_view">Table view</string>
 </resources>

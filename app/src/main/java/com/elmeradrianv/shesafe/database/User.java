@@ -1,12 +1,9 @@
 package com.elmeradrianv.shesafe.database;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.elmeradrianv.shesafe.R;
 import com.parse.ParseClassName;
 import com.parse.ParseFile;
 import com.parse.ParseUser;

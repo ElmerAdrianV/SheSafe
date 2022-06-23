@@ -13,13 +13,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.elmeradrianv.shesafe.database.User;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -84,21 +82,6 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Returns the File for a photo stored on disk given the fileName
-    public File getPhotoFileUri(String fileName) {
-        // Get safe storage directory for photos
-        // Use `getExternalFilesDir` on Context to access package-specific directories.
-        // This way, we don't need to request external read/write runtime permissions.
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
-            Log.d(TAG, "failed to create directory");
-        }
-
-        // Return the file target for the photo based on filename
-        return new File(mediaStorageDir.getPath() + File.separator + fileName);
-    }
 
     private void signupNewUser(String username, String firstName, String lastName, String email, String personalDescription, String password) {
         ParseUser user = new ParseUser();
@@ -114,7 +97,7 @@ public class SignUpActivity extends AppCompatActivity {
                 Log.e(TAG, "signupNewUser: Signup error", e2);
                 return;
             }
-            if(PERSONALIZED_PHOTO_PICKED) {
+            if (PERSONALIZED_PHOTO_PICKED) {
                 user.put(User.PROFILE_PHOTO_KEY, profilePhoto);
                 user.saveInBackground((SaveCallback) e3 -> {
                     if (e2 != null) {
@@ -123,12 +106,11 @@ public class SignUpActivity extends AppCompatActivity {
                         return;
                     }
                 });
-                PERSONALIZED_PHOTO_PICKED=false;
-                profilePhoto=null;
+                PERSONALIZED_PHOTO_PICKED = false;
+                profilePhoto = null;
             }
             Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
         });
-
     }
 
 
@@ -161,7 +143,7 @@ public class SignUpActivity extends AppCompatActivity {
             Uri photoUri = data.getData();
 
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
-            Cursor cursor = this.getContentResolver().query(photoUri,filePathColumn, null, null, null);
+            Cursor cursor = this.getContentResolver().query(photoUri, filePathColumn, null, null, null);
             cursor.moveToFirst();
             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
             String mCurrentPhotoPath = cursor.getString(columnIndex);

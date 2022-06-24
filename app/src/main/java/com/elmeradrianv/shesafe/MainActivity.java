@@ -24,24 +24,7 @@ public class MainActivity extends AppCompatActivity {
 //        final Fragment fragment3 = new ThirdFragment();
 
         setupBottomNavigationView(bottomNavigationView, fragmentManager);
-        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_profile:
-                        // do something here
-                        return true;
-                    case R.id.action_map:
-                        // do something here
-                        return true;
-                    case R.id.action_table:
-                        // do something here
-                        return true;
-                    default:
-                        return true;
-                }
-            }
-        });
+
     }
 
     private void setupBottomNavigationView(BottomNavigationView bottomNavigationView, FragmentManager fragmentManager) {

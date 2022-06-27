@@ -174,31 +174,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Marker marker;
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(reportLatLng)
-                .title(title);
-        switch (levelOfRisk) {
-            case TypeOfCrime.LOW_RISK:
-                markerOptions.icon(getNewIcon( IconGenerator.STYLE_WHITE));
-                break;
-            case TypeOfCrime.MEDIUM_LOW_RISK:
-                markerOptions.icon(getNewIcon( IconGenerator.STYLE_ORANGE));
-                break;
-            case TypeOfCrime.MEDIUM_RISK:
-                markerOptions.icon(getNewIcon(IconGenerator.STYLE_RED));
-                break;
-            case TypeOfCrime.MEDIUM_HIGH_RISK:
-                markerOptions.icon(getNewIcon( IconGenerator.STYLE_PURPLE));
-                break;
-            case TypeOfCrime.HIGH_RISK:
-                markerOptions.icon(getNewIcon(IconGenerator.STYLE_BLUE));
-                break;
-        }
+                .title(title).icon(getNewIcon(levelOfRisk));
         marker = map.addMarker(markerOptions);
         dropPinEffect(marker);
     }
 
-    private BitmapDescriptor getNewIcon(int color) {
+    private BitmapDescriptor getNewIcon(int levelOfRisk) {
         BitmapDescriptor icon=BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);;
-        switch (color) {
+        switch (levelOfRisk) {
             case 1:
                  icon= BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);
                 break;

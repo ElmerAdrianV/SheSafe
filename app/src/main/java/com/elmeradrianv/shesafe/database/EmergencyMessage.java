@@ -1,9 +1,10 @@
 package com.elmeradrianv.shesafe.database;
 
+import com.parse.ParseClassName;
 import com.parse.ParseObject;
 
 import org.json.JSONArray;
-
+@ParseClassName("EmergencyMessage")
 public class EmergencyMessage extends ParseObject {
     public static final String MESSAGE_KEY = "message";
     public static final String USER_KEY = "user";

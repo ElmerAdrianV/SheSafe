@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.elmeradrianv.shesafe.BuildConfig;
 import com.parse.Parse;
+import com.parse.ParseObject;
 
 
 public class ParseApplication extends Application {
@@ -15,6 +16,9 @@ public class ParseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        ParseObject.registerSubclass(Report.class);
+        ParseObject.registerSubclass(EmergencyMessage.class);
+        ParseObject.registerSubclass(TypeOfCrime.class);
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId(APPLICATION_ID)
                 .clientKey(CLIENTE_KEY)

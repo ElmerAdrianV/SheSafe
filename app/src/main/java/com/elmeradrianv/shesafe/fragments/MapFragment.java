@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.Report;
+import com.elmeradrianv.shesafe.database.TypeOfCrime;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -175,19 +176,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 .position(reportLatLng)
                 .title(title);
         switch (levelOfRisk) {
-            case 1:
+            case TypeOfCrime.LOW_RISK:
                 markerOptions.icon(getNewIcon( IconGenerator.STYLE_WHITE));
                 break;
-            case 2:
+            case TypeOfCrime.MEDIUM_LOW_RISK:
                 markerOptions.icon(getNewIcon( IconGenerator.STYLE_ORANGE));
                 break;
-            case 3:
+            case TypeOfCrime.MEDIUM_RISK:
                 markerOptions.icon(getNewIcon(IconGenerator.STYLE_RED));
                 break;
-            case 4:
+            case TypeOfCrime.MEDIUM_HIGH_RISK:
                 markerOptions.icon(getNewIcon( IconGenerator.STYLE_PURPLE));
                 break;
-            case 5:
+            case TypeOfCrime.HIGH_RISK:
                 markerOptions.icon(getNewIcon(IconGenerator.STYLE_BLUE));
                 break;
         }

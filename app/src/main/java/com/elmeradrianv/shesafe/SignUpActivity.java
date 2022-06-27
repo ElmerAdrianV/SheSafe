@@ -103,6 +103,7 @@ public class SignUpActivity extends AppCompatActivity {
                 profilePhoto = null;
             }
             Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+            goMainActivity();
         });
     }
 

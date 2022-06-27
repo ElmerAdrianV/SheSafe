@@ -30,8 +30,7 @@ public class SignUpActivity extends AppCompatActivity {
     // PICK_PHOTO_CODE is a constant integer
     public final static int PICK_PHOTO_CODE = 1046;
     private static final String TAG = SignUpActivity.class.getSimpleName();
-    private static boolean PERSONALIZED_PHOTO_PICKED = false;
-    private ParseFile profilePhoto;
+    private ParseFile profilePhoto=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +50,9 @@ public class SignUpActivity extends AppCompatActivity {
         Button btnSignUp = findViewById(R.id.btnSignUp);
         Button btnAddProfilePhoto = findViewById(R.id.btnAddProfilePhoto);
 
-
         setImage("", ivProfilePhoto);
         setupBtnSignUp(btnSignUp, etUsername, etFirstName, etLastName, etEmail, etPersonalDescription, etPassword, etPasswordConfirm);
         setBtnAddProfilePhoto(btnAddProfilePhoto);
-
-
     }
 
 
@@ -69,16 +65,14 @@ public class SignUpActivity extends AppCompatActivity {
             String personalDescription = etPersonalDescription.getText().toString();
             String password = etPassword.getText().toString();
             String passwordConfirm = etPasswordConfirm.getText().toString();
-            if (username.isEmpty() && firstName.isEmpty() && lastName.isEmpty() && email.isEmpty() && personalDescription.isEmpty() && password.isEmpty() && passwordConfirm.isEmpty()) {
+            if (username.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || personalDescription.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
                 Toast.makeText(this, "Please fill all the fields", Toast.LENGTH_SHORT).show();
             } else {
-                if (password.equals(passwordConfirm)) {
-                    signupNewUser(username, firstName, lastName, email, personalDescription, password);
-                } else {
+                if (! password.equals(passwordConfirm))
                     Toast.makeText(this, "Password doesn't matched", Toast.LENGTH_SHORT).show();
-                }
+                 else
+                    signupNewUser(username, firstName, lastName, email, personalDescription, password);
             }
-
         });
     }
 
@@ -91,22 +85,21 @@ public class SignUpActivity extends AppCompatActivity {
         user.put(User.PERSONAL_DESCRIPTION_KEY, personalDescription);
         user.put(User.FIRST_NAME_KEY, firstName);
         user.put(User.LAST_NAME_KEY, lastName);
-        user.signUpInBackground(e2 -> {
-            if (e2 != null) {
+        user.signUpInBackground(error -> {
+            if (error != null) {
                 Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "signupNewUser: Signup error", e2);
+                Log.e(TAG, "signupNewUser: Signup error", error);
                 return;
             }
-            if (PERSONALIZED_PHOTO_PICKED) {
+            if (profilePhoto==null) {
                 user.put(User.PROFILE_PHOTO_KEY, profilePhoto);
-                user.saveInBackground((SaveCallback) e3 -> {
-                    if (e2 != null) {
+                user.saveInBackground((SaveCallback) error1 -> {
+                    if (error1 != null) {
                         Toast.makeText(this, "Couldn't sign up", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "signupNewUser: Signup error", e2);
+                        Log.e(TAG, "signupNewUser: Signup error", error1);
                         return;
                     }
                 });
-                PERSONALIZED_PHOTO_PICKED = false;
                 profilePhoto = null;
             }
             Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
@@ -132,7 +125,6 @@ public class SignUpActivity extends AppCompatActivity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             // Bring up gallery to select a photo
             startActivityForResult(intent, PICK_PHOTO_CODE);
-            PERSONALIZED_PHOTO_PICKED = true;
         }
     }
 

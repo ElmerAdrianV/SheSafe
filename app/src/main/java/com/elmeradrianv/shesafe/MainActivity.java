@@ -11,8 +11,6 @@ import androidx.fragment.app.FragmentManager;
 import com.elmeradrianv.shesafe.fragments.MapFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class MainActivity extends AppCompatActivity {
 
     @Override

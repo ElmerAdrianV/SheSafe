@@ -21,7 +21,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         EditText etUsername = findViewById(R.id.etUsername);
-        EditText etPassword = findViewById(R.id.etLastName);
+        EditText etPassword = findViewById(R.id.etPassword);
         Button btnLogin = findViewById(R.id.btnAddProfilePhoto);
         Button btnSignUp = findViewById(R.id.btnSignUp);
         //To hide the action bar in appcompact activity

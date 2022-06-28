@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.elmeradrianv.shesafe">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".database.ParseApplication"
         android:allowBackup="true"
@@ -14,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SheSafe"
         tools:targetApi="31">
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />
@@ -29,6 +37,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- make sure within the application tag, otherwise app will crash with XmlResourceParser errors -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.elmeradrianv.fileprovider.shesafe"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
     </application>
 
 </manifest>

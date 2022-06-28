@@ -83,7 +83,6 @@ For She Safe, we identified the following “must-have” features which a user 
 
 <img src="https://raw.githubusercontent.com/ElmerAdrianV/SheSafe/master/Wireframes.jpeg" width=600>
 
-
 ### [BONUS] Digital Wireframes & Mockups
 
 ### [BONUS] Interactive Prototype

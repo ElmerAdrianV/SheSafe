@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">SheSafe</string>
     <string name="she_safe_logo_in_landscape">She Safe logo in landscape</string>
-    <string name="password">password</string>
-    <string name="login">login</string>
-    <string name="username">username</string>
-    <string name="sign_up">sign up</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="sign_up">Sign Up</string>
     <string name="or">or</string>
+    <string name="add_profile_photo">Add profile photo</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="email">Email</string>
+    <string name="personal_description">Personal Description</string>
+    <string name="confirm_your_password">Confirm your password</string>
 </resources>

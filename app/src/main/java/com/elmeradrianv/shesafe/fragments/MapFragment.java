@@ -1,5 +1,8 @@
 package com.elmeradrianv.shesafe.fragments;
 
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
+
+import android.Manifest;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -16,7 +19,10 @@ import androidx.fragment.app.Fragment;
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.Report;
 import com.elmeradrianv.shesafe.database.TypeOfCrime;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -30,23 +36,14 @@ import com.parse.ParseQuery;
 import java.util.ArrayList;
 import java.util.List;
 
+import permissions.dispatcher.NeedsPermission;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = MapFragment.class.getSimpleName();
-
     private GoogleMap map;
     private LocationRequest locationRequest;
     Location currentLocation;
-    private long UPDATE_INTERVAL = 60000;  /* 60 secs */
-    private long FASTEST_INTERVAL = 5000; /* 5 secs */
     private final static String KEY_LOCATION = "location";
-
-    /*
-     * Define a request code to send to Google Play services This code is
-     * returned in Activity.onActivityResult
-     */
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-
 
     public MapFragment() {
         // Required empty public constructor
@@ -64,6 +61,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
+        if (savedInstanceState != null && savedInstanceState.keySet().contains(KEY_LOCATION)) {
+            // Since KEY_LOCATION was found in the Bundle, we can be sure that mCurrentLocation
+            // is not null.
+            currentLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+        }
         mapFragment.getMapAsync(this);
     }
 
@@ -71,7 +73,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
@@ -89,9 +90,82 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-
-//        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        getMyLocation();
         queryReports();
+    }
+
+    @SuppressWarnings({"MissingPermission"})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    void getMyLocation() {
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+
+        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(getContext());
+        locationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        onLocationChanged(location);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.d("MapDemoActivity", "Error trying to get last GPS location");
+                    e.printStackTrace();
+                });
+    }
+
+    public void onLocationChanged(Location location) {
+        // GPS may be turned off
+        if (location == null) {
+            return;
+        }
+        currentLocation = location;
+        displayLocation();
+    }
+
+    private void displayLocation() {
+        if (currentLocation != null) {
+            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
+            map.animateCamera(cameraUpdate);
+        }
+    }
+
+
+    private List<Report> queryReports() {
+        List<Report> reports = new ArrayList<>();
+        ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
+        query.include(Report.TYPE_OF_CRIME_KEY);
+        query.setLimit(50);
+        query.addDescendingOrder("createdAt");
+        query.findInBackground((reportList, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with getting posts", e);
+                return;
+            }
+            reports.addAll(reportList);
+            showReports(reports);
+        });
+        return reports;
+    }
+
+    private void showReports(List<Report> reports) {
+        for (Report report : reports) {
+            showMarker(report.getTypeOfCrime().getTag(),
+                    report.getLocation().getLatitude(),
+                    report.getLocation().getLongitude(),
+                    report.getTypeOfCrime().getLevelOfRisk());
+        }
+    }
+
+    private void showMarker(String title, double latitude, double longitude, int levelOfRisk) {
+        LatLng reportLatLng = new LatLng(latitude, longitude);
+        Marker marker;
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(reportLatLng)
+                .title(title).icon(getNewIcon(levelOfRisk));
+        marker = map.addMarker(markerOptions);
+        dropPinEffect(marker);
     }
 
     private void dropPinEffect(Marker marker) {
@@ -99,11 +173,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         final android.os.Handler handler = new android.os.Handler();
         final long start = SystemClock.uptimeMillis();
         final long duration = 1500;
-
         // Use the bounce interpolator
         final android.view.animation.Interpolator interpolator =
                 new BounceInterpolator();
-
         // Animate marker with a bounce updating its position every 15ms
         handler.post(new Runnable() {
             @Override
@@ -124,52 +196,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         });
-    }
-
-    private List<Report> queryReports() {
-        List<Report> reports = new ArrayList<>();
-        // specify what type of data we want to query - Post.class
-        ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
-        // include data referred by user key
-        query.include(Report.TYPE_OF_CRIME_KEY);
-        // limit query to latest 50 items
-        query.setLimit(50);
-//        query.setSkip(currentLimit-NUMBER_POSTS_REQUEST); // skip the first 10 results
-        // order posts by creation date (newest first)
-        query.addDescendingOrder("createdAt");
-        // start an asynchronous call for posts
-        query.findInBackground((reportList, e) -> {
-            // check for errors
-            if (e != null) {
-                Log.e(TAG, "Issue with getting posts", e);
-                return;
-            }
-            // save received posts to list and notify adapter of new data
-            reports.addAll(reportList);
-            showReports(reports);
-        });
-        return reports;
-    }
-
-    private void showReports(List<Report> reports) {
-
-        for (Report report : reports) {
-            showMarker(report.getTypeOfCrime().getTag(),
-                    report.getLocation().getLatitude(),
-                    report.getLocation().getLongitude(),
-                    report.getTypeOfCrime().getLevelOfRisk());
-        }
-    }
-
-
-    private void showMarker(String title, double latitude, double longitude, int levelOfRisk) {
-        LatLng reportLatLng = new LatLng(latitude, longitude);
-        Marker marker;
-        MarkerOptions markerOptions = new MarkerOptions()
-                .position(reportLatLng)
-                .title(title).icon(getNewIcon(levelOfRisk));
-        marker = map.addMarker(markerOptions);
-        dropPinEffect(marker);
     }
 
     private BitmapDescriptor getNewIcon(int levelOfRisk) {

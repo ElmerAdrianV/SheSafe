@@ -25,13 +25,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.ui.IconGenerator;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
-//@RuntimePermissions
+
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = MapFragment.class.getSimpleName();
 
@@ -65,7 +64,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
-
         mapFragment.getMapAsync(this);
     }
 
@@ -91,12 +89,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-//        map.setOnMapLongClickListener(this);
-//      //   Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        map.addMarker(new MarkerOptions()
-//                .position(sydney)
-//                .title("Marker in Sydney"));
+
 //        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         queryReports();
     }
@@ -180,21 +173,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private BitmapDescriptor getNewIcon(int levelOfRisk) {
-        BitmapDescriptor icon=BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);;
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);
+        ;
         switch (levelOfRisk) {
-            case 1:
-                 icon= BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);
+            case TypeOfCrime.LOW_RISK:
+                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_yellow);
                 break;
-            case 2:
-               icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_orange);
+            case TypeOfCrime.MEDIUM_LOW_RISK:
+                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_orange);
                 break;
-            case 3:
-                 icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_red);
+            case TypeOfCrime.MEDIUM_RISK:
+                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_red);
                 break;
-            case 4:
-                 icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_blue);
+            case TypeOfCrime.MEDIUM_HIGH_RISK:
+                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_blue);
                 break;
-            case 5:
+            case TypeOfCrime.HIGH_RISK:
                 icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_purple);
                 break;
         }

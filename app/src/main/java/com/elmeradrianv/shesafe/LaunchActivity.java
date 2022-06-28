@@ -13,7 +13,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        getSupportActionBar().hide();
+
 
         //Launch Activity to show the welcome logo of the app
         new Handler().postDelayed(() -> {

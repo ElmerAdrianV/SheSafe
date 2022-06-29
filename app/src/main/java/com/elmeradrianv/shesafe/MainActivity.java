@@ -1,9 +1,7 @@
 package com.elmeradrianv.shesafe;
 
 import android.os.Bundle;
-import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -35,25 +33,22 @@ public class MainActivity extends AppCompatActivity {
     private void setupBottomNavigationView(BottomNavigationView bottomNavigationView, FragmentManager fragmentManager, Fragment mapFragment, Fragment tableFragment, Fragment profileUserFragment) {
         // handle navigation selection
         bottomNavigationView.setOnItemSelectedListener(
-                new BottomNavigationView.OnItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        Fragment fragment = null;
-                        switch (item.getItemId()) {
-                            case R.id.action_map:
-                                fragment = mapFragment;
-                                break;
-                            case R.id.action_profile:
-                                fragment = profileUserFragment;
-                                break;
-                            case R.id.action_table:
-                                fragment = tableFragment;
-                            default:
-                                break;
-                        }
-                        fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
-                        return true;
+                item -> {
+                    Fragment fragment = null;
+                    switch (item.getItemId()) {
+                        case R.id.action_map:
+                            fragment = mapFragment;
+                            break;
+                        case R.id.action_profile:
+                            fragment = profileUserFragment;
+                            break;
+                        case R.id.action_table:
+                            fragment = tableFragment;
+                        default:
+                            break;
                     }
+                    fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
+                    return true;
                 });
         // Set default selection
         bottomNavigationView.setSelectedItemId(R.id.action_map);

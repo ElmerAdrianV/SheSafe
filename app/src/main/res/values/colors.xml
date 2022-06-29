@@ -8,4 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="ss_pink">#d971b8</color>
+    <color name="blue_cute">#03A9F4</color>
+    <color name="red_ss">#FF0000</color>
+    <color name="green_ss">#7ADA0C</color>
 </resources>

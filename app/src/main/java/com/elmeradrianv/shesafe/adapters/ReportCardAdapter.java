@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.Report;
+import com.elmeradrianv.shesafe.fragments.TableViewFragment;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
@@ -80,11 +81,12 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
             tvTypeOfCrime.setText(report.getTypeOfCrime().getTag());
         }
     }
-    public void showReports() {
+    public void showReports(int currentLimit) {
         List<Report> reports = new ArrayList<>();
         ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
         query.include(Report.TYPE_OF_CRIME_KEY);
-        query.setLimit(50);
+        query.setLimit(currentLimit);
+        query.setSkip(currentLimit- TableViewFragment.NUMBER_REPORTS_REQUEST); // skip the first 10 results
         query.addDescendingOrder("createdAt");
         query.findInBackground((reportList, e) -> {
             if (e != null) {

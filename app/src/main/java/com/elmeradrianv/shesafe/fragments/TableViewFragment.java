@@ -50,10 +50,10 @@ public class TableViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SwipeRefreshLayout swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        SwipeRefreshLayout swipeContainer = view.findViewById(R.id.swipeContainer);
         createSwipeRefresh(swipeContainer);
 
-        RecyclerView rvReportCard = (RecyclerView) view.findViewById(R.id.rvReportCards);
+        RecyclerView rvReportCard = view.findViewById(R.id.rvReportCards);
 
         rvReportCard.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

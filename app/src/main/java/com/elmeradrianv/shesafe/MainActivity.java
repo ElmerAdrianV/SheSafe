@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.elmeradrianv.shesafe.fragments.MapFragment;
+import com.elmeradrianv.shesafe.fragments.ProfileUserFragment;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -25,13 +26,13 @@ public class MainActivity extends AppCompatActivity {
         // define your fragments here
         final Fragment mapFragment = new MapFragment();
         final Fragment tableFragment = new TableViewFragment();
-//        final Fragment fragment3 = new ThirdFragment();
+        final Fragment profileUserFragment = new ProfileUserFragment();
 
-        setupBottomNavigationView(bottomNavigationView, fragmentManager, mapFragment,tableFragment);
+        setupBottomNavigationView(bottomNavigationView, fragmentManager, mapFragment, tableFragment, profileUserFragment);
 
     }
 
-    private void setupBottomNavigationView(BottomNavigationView bottomNavigationView, FragmentManager fragmentManager, Fragment mapFragment, Fragment tableFragment) {
+    private void setupBottomNavigationView(BottomNavigationView bottomNavigationView, FragmentManager fragmentManager, Fragment mapFragment, Fragment tableFragment, Fragment profileUserFragment) {
         // handle navigation selection
         bottomNavigationView.setOnItemSelectedListener(
                 new BottomNavigationView.OnItemSelectedListener() {
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                                 fragment = mapFragment;
                                 break;
                             case R.id.action_profile:
-                                //fragment = fragment2;
+                                fragment = profileUserFragment;
                                 break;
                             case R.id.action_table:
                                 fragment = tableFragment;
@@ -57,6 +58,4 @@ public class MainActivity extends AppCompatActivity {
         // Set default selection
         bottomNavigationView.setSelectedItemId(R.id.action_map);
     }
-
-
 }

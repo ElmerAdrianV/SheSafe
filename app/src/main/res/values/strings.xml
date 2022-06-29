@@ -20,4 +20,5 @@
     <string name="change_profile_photo">Change profile photo</string>
     <string name="emergency_message">Emergency Message</string>
     <string name="your_emergency_contacts">Your emergency contacts</string>
+    <string name="phone_number">Phone number:</string>
 </resources>

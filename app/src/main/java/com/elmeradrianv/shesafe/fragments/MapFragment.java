@@ -36,10 +36,10 @@ import permissions.dispatcher.NeedsPermission;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = MapFragment.class.getSimpleName();
+    private final static String KEY_LOCATION = "location";
+    Location currentLocation;
     private GoogleMap map;
     private LocationRequest locationRequest;
-    Location currentLocation;
-    private final static String KEY_LOCATION = "location";
 
     public MapFragment() {
         // Required empty public constructor

@@ -19,10 +19,8 @@ import com.elmeradrianv.shesafe.auxiliar.EndlessRecyclerViewScrollListener;
 
 public class TableViewFragment extends Fragment {
     public static final String TAG = TableViewFragment.class.getSimpleName();
-    protected ReportCardAdapter adapter;
     public static final int NUMBER_REPORTS_REQUEST = 20;
-
-
+    protected ReportCardAdapter adapter;
     // Store a member variable for the listener
     private EndlessRecyclerViewScrollListener scrollListener;
     private int currentOffset = NUMBER_REPORTS_REQUEST;//Count number of posts in the timeline

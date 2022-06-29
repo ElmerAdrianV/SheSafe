@@ -39,6 +39,7 @@ public class PinAnimation {
             }
         });
     }
+
     public static BitmapDescriptor getNewIconWithLevelOfRisk(int levelOfRisk) {
         BitmapDescriptor icon;
         switch (levelOfRisk) {
@@ -57,8 +58,8 @@ public class PinAnimation {
             case TypeOfCrime.HIGH_RISK:
                 icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_ss_marker_purple);
                 break;
-            default :
-                icon=null;
+            default:
+                icon = null;
                 break;
         }
         return icon;

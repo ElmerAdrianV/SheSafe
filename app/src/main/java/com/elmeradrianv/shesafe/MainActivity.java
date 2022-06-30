@@ -15,39 +15,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-        // define your fragments here
-        final Fragment mapFragment = new MapFragment();
-        final Fragment tableFragment = new TableViewFragment();
-        final Fragment profileUserFragment = new ProfileUserFragment();
-
-        setupBottomNavigationView(bottomNavigationView, fragmentManager, mapFragment, tableFragment, profileUserFragment);
-
+        setupBottomNavigationView();
     }
 
-    private void setupBottomNavigationView(BottomNavigationView bottomNavigationView, FragmentManager fragmentManager, Fragment mapFragment, Fragment tableFragment, Fragment profileUserFragment) {
+    private void setupBottomNavigationView() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         // handle navigation selection
         bottomNavigationView.setOnItemSelectedListener(
                 item -> {
                     Fragment fragment = null;
                     switch (item.getItemId()) {
                         case R.id.action_map:
-                            fragment = mapFragment;
+                            fragment = new MapFragment();
                             break;
                         case R.id.action_profile:
-                            fragment = profileUserFragment;
+                            fragment = new ProfileUserFragment();
                             break;
                         case R.id.action_table:
-                            fragment = tableFragment;
+                            fragment = new TableViewFragment();
                         default:
                             break;
                     }
-                    fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).commit();
                     return true;
                 });
         // Set default selection

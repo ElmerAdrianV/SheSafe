@@ -35,8 +35,6 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-        //To hide the action bar in appcompact activity
-        getSupportActionBar().hide();
 
         ImageView ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
         EditText etUsername = findViewById(R.id.etUsername);

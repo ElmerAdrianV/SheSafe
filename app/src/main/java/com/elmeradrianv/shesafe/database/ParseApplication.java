@@ -17,7 +17,6 @@ public class ParseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ParseObject.registerSubclass(Report.class);
-        ParseObject.registerSubclass(EmergencyMessage.class);
         ParseObject.registerSubclass(EmergencyContacts.class);
         ParseObject.registerSubclass(TypeOfCrime.class);
         Parse.initialize(new Parse.Configuration.Builder(this)

@@ -64,7 +64,6 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
     }
 
     public void showReports(int currentLimit) {
-        List<Report> reports = new ArrayList<>();
         ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
         query.include(Report.TYPE_OF_CRIME_KEY);
         query.setLimit(currentLimit);

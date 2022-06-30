@@ -68,11 +68,11 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
         ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
         query.include(Report.TYPE_OF_CRIME_KEY);
         query.setLimit(currentLimit);
-        query.setSkip(currentLimit - TableViewFragment.NUMBER_REPORTS_REQUEST); // skip the first 10 results
+        query.setSkip(currentLimit - TableViewFragment.NUMBER_REPORTS_REQUEST);
         query.addDescendingOrder("createdAt");
         query.findInBackground((reportList, e) -> {
             if (e != null) {
-                Log.e(TAG, "Issue with getting posts", e);
+                Log.e(TAG, "Issue with getting reports", e);
                 return;
             }
             this.addAll(reportList);

@@ -58,9 +58,9 @@ public class TableViewFragment extends Fragment {
         rvReportCard.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         rvReportCard.setLayoutManager(linearLayoutManager);
-        adapter = new ReportCardAdapter(getContext());
+        adapter = new ReportCardAdapter();
         rvReportCard.setAdapter(adapter);
-        adapter.showReports(currentOffset);
+        adapter.fetchReports(currentOffset);
         rvReportCard.setItemAnimator(null);
         // Retain an instance so that you can call `resetState()` for fresh searches
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -77,14 +77,14 @@ public class TableViewFragment extends Fragment {
 
     private void fetchFeedAsync() {
         adapter.clear();
-        adapter.showReports(NUMBER_REPORTS_REQUEST);
+        adapter.fetchReports(NUMBER_REPORTS_REQUEST);
         currentOffset = NUMBER_REPORTS_REQUEST;
     }
 
     // Append the next page of data into the adapter
     // This method probably sends out a network request and appends new data items to your adapter.
     public void loadNextDataFromApi(int offset) {
-        adapter.showReports(currentOffset + NUMBER_REPORTS_REQUEST);
+        adapter.fetchReports(currentOffset + NUMBER_REPORTS_REQUEST);
         int itemCountAdded = adapter.getItemCount() - currentOffset - 1;
         adapter.notifyItemRangeInserted(currentOffset, itemCountAdded);
         currentOffset += NUMBER_REPORTS_REQUEST;

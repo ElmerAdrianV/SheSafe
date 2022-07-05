@@ -1,6 +1,8 @@
 package com.elmeradrianv.shesafe.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
-import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
@@ -90,19 +91,21 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNickname = itemView.findViewById(R.id.tvNickname);
-            tvPhoneNumber= itemView.findViewById(R.id.tvPhoneNumber);
+            tvPhoneNumber = itemView.findViewById(R.id.tvPhoneNumber);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-            btnCall=itemView.findViewById(R.id.btnCall);
+            btnCall = itemView.findViewById(R.id.btnCall);
         }
 
         public void bind(EmergencyContacts contact) throws ParseException {
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
             btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));
+            btnCall.setOnClickListener(v -> makeACall());
         }
-        private void deleteEmergencyContact(EmergencyContacts contact){
+
+        private void deleteEmergencyContact(EmergencyContacts contact) {
             contact.deleteInBackground(e -> {
-                if(e!=null)
+                if (e != null)
                     Log.e(TAG, "deleteEmergencyContact: issue deleting emergency contact", e);
                 else {
                     contacts.remove(getAdapterPosition());
@@ -110,6 +113,11 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
                     notifyDataSetChanged();
                 }
             });
+        }
+
+        private void makeACall() {
+            context.startActivity(new Intent(Intent.ACTION_DIAL)
+                                    .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
         }
     }
 

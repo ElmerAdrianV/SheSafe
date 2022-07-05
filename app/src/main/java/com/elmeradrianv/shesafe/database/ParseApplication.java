@@ -23,6 +23,5 @@ public class ParseApplication extends Application {
                 .applicationId(APPLICATION_ID)
                 .clientKey(CLIENT_KEY)
                 .server(SERVER).build());
-
     }
 }

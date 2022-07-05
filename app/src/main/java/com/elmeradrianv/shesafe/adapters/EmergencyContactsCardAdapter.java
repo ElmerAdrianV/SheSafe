@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
+import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
@@ -96,6 +98,18 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         public void bind(EmergencyContacts contact) throws ParseException {
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
+            btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));
+        }
+        private void deleteEmergencyContact(EmergencyContacts contact){
+            contact.deleteInBackground(e -> {
+                if(e!=null)
+                    Log.e(TAG, "deleteEmergencyContact: issue deleting emergency contact", e);
+                else {
+                    contacts.remove(getAdapterPosition());
+                    Toast.makeText(context, tvNickname.getText().toString() + " deleted", Toast.LENGTH_SHORT).show();
+                    notifyDataSetChanged();
+                }
+            });
         }
     }
 

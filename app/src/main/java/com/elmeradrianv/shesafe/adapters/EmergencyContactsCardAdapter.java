@@ -16,9 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
+import com.elmeradrianv.shesafe.database.User;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +74,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         ParseQuery<EmergencyContacts> query = ParseQuery.getQuery(EmergencyContacts.class);
         query.include(EmergencyContacts.USER_KEY);
         query.setLimit(currentLimit);
+        query.whereEqualTo("user", ParseUser.getCurrentUser());
         query.setSkip(currentLimit - TableViewFragment.NUMBER_REPORTS_REQUEST); // skip the first 10 results
         query.addDescendingOrder("createdAt");
         query.findInBackground((contactsList, e) -> {

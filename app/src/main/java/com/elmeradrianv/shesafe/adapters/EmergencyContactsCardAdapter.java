@@ -43,7 +43,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
     @NonNull
     @Override
     public EmergencyContactsCardAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.report_card_view, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.contact_card_view, parent, false);
         return new EmergencyContactsCardAdapter.ViewHolder(view);
     }
 
@@ -64,7 +64,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         return contacts.size();
     }
 
-    public void showContacts(int currentLimit) {
+    public void fetchContacts(int currentLimit) {
         ParseQuery<EmergencyContacts> query = ParseQuery.getQuery(EmergencyContacts.class);
         query.include(EmergencyContacts.USER_KEY);
         query.setLimit(currentLimit);

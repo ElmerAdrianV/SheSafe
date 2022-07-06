@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                         message,
                         null, null);
             }
-
+            Toast.makeText(this,"Your emergency message was sent to all yours emergency contacts", Toast.LENGTH_LONG).show();
         });
     }
 

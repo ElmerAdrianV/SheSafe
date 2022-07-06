@@ -31,22 +31,20 @@ import com.elmeradrianv.shesafe.adapters.EmergencyContactsCardAdapter;
 import com.elmeradrianv.shesafe.auxiliar.MyPair;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
 import com.elmeradrianv.shesafe.database.User;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.io.File;
 import java.util.HashMap;
 
 
 public class ProfileUserFragment extends Fragment {
-    protected EmergencyContactsCardAdapter adapter;
     public final static int PICK_PHOTO_CODE = 1046;
+    public static final String TAG = ProfileUserFragment.class.getSimpleName();
+    protected EmergencyContactsCardAdapter adapter;
     private ParseUser currentUser = ParseUser.getCurrentUser();
     private ParseFile profilePhoto;
     private ImageView ivProfileView;
-    public static final String TAG = ProfileUserFragment.class.getSimpleName();
 
     public ProfileUserFragment() {
         // Required empty public constructor
@@ -88,28 +86,27 @@ public class ProfileUserFragment extends Fragment {
     }
 
     private void setupAdd(View view) {
-        String nickname=((EditText)view.findViewById(R.id.etNickname)).getText().toString();
-        String number=((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
+        String nickname = ((EditText) view.findViewById(R.id.etNickname)).getText().toString();
+        String number = ((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
         EmergencyContacts contact = new EmergencyContacts();
-        if(nickname.isEmpty() && number.isEmpty()){
-            Toast.makeText(getContext(),"Please, fill all the fields",Toast.LENGTH_SHORT).show();
-        }
-        else{
-            contact.put(EmergencyContacts.USER_KEY,currentUser);
-            contact.put(EmergencyContacts.NICKNAME_KEY,nickname);
-            contact.put(EmergencyContacts.NUMBER_KEY,new Long(number));
+        if (nickname.isEmpty() && number.isEmpty()) {
+            Toast.makeText(getContext(), "Please, fill all the fields", Toast.LENGTH_SHORT).show();
+        } else {
+            contact.put(EmergencyContacts.USER_KEY, currentUser);
+            contact.put(EmergencyContacts.NICKNAME_KEY, nickname);
+            contact.put(EmergencyContacts.NUMBER_KEY, new Long(number));
             contact.saveInBackground(e -> {
-                if(e!=null){
-                    Log.e(TAG, "setupAdd: Issue adding contact ",e );
+                if (e != null) {
+                    Log.e(TAG, "setupAdd: Issue adding contact ", e);
                 }
-                Toast.makeText(getContext(),"Contact saved!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Contact saved!!", Toast.LENGTH_SHORT).show();
                 CardView cvNewContact = view.findViewById(R.id.cvNewContact);
                 ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
                 cvNewContact.setVisibility(View.GONE);
                 btnAddContact.setRotation(0);
                 btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
                 adapter.addFirst(contact);
-                ((RecyclerView)view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
+                ((RecyclerView) view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
             });
         }
     }

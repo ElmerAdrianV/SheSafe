@@ -16,10 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
-import com.elmeradrianv.shesafe.database.User;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
-import com.parse.Parse;
-import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -45,8 +42,9 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         contacts.addAll(list);
         notifyDataSetChanged();
     }
+
     public void addFirst(EmergencyContacts contact) {
-        contacts.add(0,contact);
+        contacts.add(0, contact);
         notifyItemInserted(0);
     }
 
@@ -100,7 +98,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
             btnCall = itemView.findViewById(R.id.btnCall);
         }
 
-        public void bind(EmergencyContacts contact){
+        public void bind(EmergencyContacts contact) {
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
             btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));
@@ -121,7 +119,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
 
         private void makeACall() {
             context.startActivity(new Intent(Intent.ACTION_DIAL)
-                                    .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
+                    .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
         }
     }
 

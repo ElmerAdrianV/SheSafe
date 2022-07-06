@@ -32,6 +32,7 @@
                 android:background="#00FFFFFF"
                 android:src="@drawable/ic_logout"
                 app:tint="@color/red_ss" />
+
             <ImageButton
                 android:id="@+id/btnSaveChanges"
                 android:layout_width="40dp"
@@ -102,9 +103,9 @@
                 android:layout_marginStart="@dimen/separation_border_parent"
                 android:layout_marginTop="30dp"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/first_name"
                 android:inputType="textPersonName"
-                android:enabled="false"
                 android:padding="5dp"
                 android:paddingStart="8dp"
                 android:textColor="@color/white"
@@ -135,9 +136,9 @@
                 android:layout_marginBottom="0dp"
                 android:layout_toEndOf="@+id/etFirstName"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/last_name"
                 android:inputType="textPersonName"
-                android:enabled="false"
                 android:padding="5dp"
                 android:paddingStart="8dp"
                 android:textColor="@color/white"

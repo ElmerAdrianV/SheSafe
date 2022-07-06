@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.parse.ParseUser;
 
@@ -18,8 +17,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        ActivityCompat.requestPermissions(this,
+        requestPermissions(
                 new String[]{
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -27,10 +25,10 @@ public class LoginActivity extends AppCompatActivity {
                         Manifest.permission.READ_SMS, Manifest.permission.INTERNET,
                         Manifest.permission.ACCESS_NETWORK_STATE,
                         Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CALL_PHONE
                 },
                 PackageManager.PERMISSION_GRANTED);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 

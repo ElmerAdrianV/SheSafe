@@ -62,13 +62,17 @@ public class SignUpActivity extends AppCompatActivity {
             String personalDescription = etPersonalDescription.getText().toString();
             String password = etPassword.getText().toString();
             String passwordConfirm = etPasswordConfirm.getText().toString();
+            boolean allFieldsFill=false;
             if (username.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || personalDescription.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
                 Toast.makeText(this, "Please fill all the fields", Toast.LENGTH_SHORT).show();
             } else {
-                if (!password.equals(passwordConfirm))
-                    Toast.makeText(this, "Password doesn't matched", Toast.LENGTH_SHORT).show();
-                else
-                    signupNewUser(username, firstName, lastName, email, personalDescription, password);
+                allFieldsFill=true;
+            }
+            if (allFieldsFill && !password.equals(passwordConfirm)) {
+                Toast.makeText(this, "Password doesn't matched", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                signupNewUser(username, firstName, lastName, email, personalDescription, password);
             }
         });
     }

@@ -16,9 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
-import com.elmeradrianv.shesafe.database.User;
 import com.elmeradrianv.shesafe.fragments.TableViewFragment;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -45,8 +43,9 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         contacts.addAll(list);
         notifyDataSetChanged();
     }
+
     public void addFirst(EmergencyContacts contact) {
-        contacts.add(0,contact);
+        contacts.add(0, contact);
         notifyItemInserted(0);
     }
 
@@ -124,8 +123,8 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         }
 
         private void makeACall() {
-            context.startActivity(new Intent(Intent.ACTION_DIAL)
-                                    .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
+            context.startActivity(new Intent(Intent.ACTION_CALL)
+                    .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
         }
     }
 

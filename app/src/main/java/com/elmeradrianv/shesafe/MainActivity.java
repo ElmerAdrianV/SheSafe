@@ -1,6 +1,7 @@
 package com.elmeradrianv.shesafe;
 
 import android.os.Bundle;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupBottomNavigationView();
+        ((ImageButton)findViewById(R.id.btnSos)).setOnClickListener(v->setupSOSButton());
+    }
+
+    private void setupSOSButton() {
+
     }
 
     private void setupBottomNavigationView() {

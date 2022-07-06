@@ -168,9 +168,9 @@
                 android:layout_marginTop="30dp"
                 android:layout_marginEnd="@dimen/separation_border_parent"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/email"
                 android:inputType="textWebEmailAddress"
-                android:enabled="false"
                 android:padding="5dp"
                 android:paddingStart="8dp"
                 android:textColor="@color/white"
@@ -201,9 +201,9 @@
                 android:layout_marginTop="30dp"
                 android:layout_marginEnd="@dimen/separation_border_parent"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/personal_description"
                 android:inputType="textPersonName|textMultiLine"
-                android:enabled="false"
                 android:padding="5dp"
                 android:paddingStart="8dp"
                 android:textAlignment="textStart"
@@ -236,9 +236,9 @@
                 android:layout_marginTop="30dp"
                 android:layout_marginEnd="@dimen/separation_border_parent"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/password"
                 android:inputType="textPassword"
-                android:enabled="false"
                 android:padding="5dp"
                 android:textColor="@color/white"
                 android:textColorHint="#6BFFFFFF"
@@ -268,9 +268,9 @@
                 android:layout_marginTop="30dp"
                 android:layout_marginEnd="@dimen/separation_border_parent"
                 android:background="@drawable/edit_text_background"
+                android:enabled="false"
                 android:hint="@string/emergency_message"
                 android:inputType="textPersonName|textMultiLine"
-                android:enabled="false"
                 android:padding="5dp"
                 android:paddingStart="8dp"
                 android:textAlignment="textStart"
@@ -292,11 +292,88 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvNewContact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvEmergencyContacts"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                app:cardMaxElevation="10dp"
+                app:cardPreventCornerOverlap="true"
+                app:cardUseCompatPadding="true">
+
+                <RelativeLayout
+                    android:id="@+id/rvNewContact"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:id="@+id/tvNewContact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="5dp"
+                        android:text="@string/add_a_new_contact"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etNickname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvNewContact"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/edit_text_background"
+                        android:ems="10"
+                        android:hint="@string/nickname"
+                        android:inputType="textPersonName"
+                        android:paddingStart="2dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="2dp"
+                        android:paddingBottom="2dp" />
+
+                    <EditText
+                        android:id="@+id/etPhoneNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/etNickname"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:ems="10"
+                        android:hint="@string/phone_number"
+                        android:inputType="phone"
+                        android:paddingStart="2dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="2dp"
+                        android:paddingBottom="2dp" />
+
+                    <Button
+                        android:id="@+id/btnAdd"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:layout_below="@+id/etPhoneNumber"
+                        android:layout_alignEnd="@+id/etPhoneNumber"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginEnd="0dp"
+                        android:backgroundTint="@color/blue_cute"
+                        android:text="@string/add" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvEmergencyContacts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/tvEmergencyContacts"
+                android:layout_below="@+id/cvNewContact"
                 android:layout_marginTop="5dp" />
 
             <ImageButton

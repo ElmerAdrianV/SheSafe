@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,9 +29,12 @@ import com.elmeradrianv.shesafe.LoginActivity;
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.adapters.EmergencyContactsCardAdapter;
 import com.elmeradrianv.shesafe.auxiliar.MyPair;
+import com.elmeradrianv.shesafe.database.EmergencyContacts;
 import com.elmeradrianv.shesafe.database.User;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.io.File;
 import java.util.HashMap;
@@ -48,8 +53,7 @@ public class ProfileUserFragment extends Fragment {
     }
 
     public static ProfileUserFragment newInstance() {
-        ProfileUserFragment fragment = new ProfileUserFragment();
-        return fragment;
+        return new ProfileUserFragment();
     }
 
     @Override
@@ -79,6 +83,49 @@ public class ProfileUserFragment extends Fragment {
         setupButtonsListeners(buttonsFieldsUser, editUserFields);
         view.findViewById(R.id.btnSaveChanges).setOnClickListener(v -> setupSaveChanges(editUserFields));
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> setupLogout());
+        view.findViewById(R.id.btnAddContact).setOnClickListener(v -> setupAddContact(view));
+        view.findViewById(R.id.btnAdd).setOnClickListener(v -> setupAdd(view));
+    }
+
+    private void setupAdd(View view) {
+        String nickname=((EditText)view.findViewById(R.id.etNickname)).getText().toString();
+        String number=((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
+        EmergencyContacts contact = new EmergencyContacts();
+        if(nickname.isEmpty() && number.isEmpty()){
+            Toast.makeText(getContext(),"Please, fill all the fields",Toast.LENGTH_SHORT).show();
+        }
+        else{
+            contact.put(EmergencyContacts.USER_KEY,currentUser);
+            contact.put(EmergencyContacts.NICKNAME_KEY,nickname);
+            contact.put(EmergencyContacts.NUMBER_KEY,new Long(number));
+            contact.saveInBackground(e -> {
+                if(e!=null){
+                    Log.e(TAG, "setupAdd: Issue adding contact ",e );
+                }
+                Toast.makeText(getContext(),"Contact saved!!", Toast.LENGTH_SHORT).show();
+                CardView cvNewContact = view.findViewById(R.id.cvNewContact);
+                ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
+                cvNewContact.setVisibility(View.GONE);
+                btnAddContact.setRotation(0);
+                btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
+                adapter.addFirst(contact);
+                ((RecyclerView)view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
+            });
+        }
+    }
+
+    private void setupAddContact(View view) {
+        CardView cvNewContact = view.findViewById(R.id.cvNewContact);
+        ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
+        if (cvNewContact.getVisibility() == View.VISIBLE) {
+            cvNewContact.setVisibility(View.GONE);
+            btnAddContact.setRotation(0);
+            btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
+        } else {
+            cvNewContact.setVisibility(View.VISIBLE);
+            btnAddContact.setRotation(45);
+            btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.red_ss), android.graphics.PorterDuff.Mode.MULTIPLY);
+        }
     }
 
     private void putProfileImage() {

@@ -45,6 +45,10 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         contacts.addAll(list);
         notifyDataSetChanged();
     }
+    public void addFirst(EmergencyContacts contact) {
+        contacts.add(0,contact);
+        notifyItemInserted(0);
+    }
 
     @NonNull
     @Override

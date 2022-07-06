@@ -61,11 +61,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
     public void onBindViewHolder(@NonNull EmergencyContactsCardAdapter.ViewHolder holder, int position) {
         //Get the data at position
         EmergencyContacts report = contacts.get(position);
-        try {
-            holder.bind(report);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        holder.bind(report);
     }
 
 
@@ -104,7 +100,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
             btnCall = itemView.findViewById(R.id.btnCall);
         }
 
-        public void bind(EmergencyContacts contact) throws ParseException {
+        public void bind(EmergencyContacts contact){
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
             btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));

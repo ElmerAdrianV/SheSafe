@@ -89,7 +89,7 @@ public class ProfileUserFragment extends Fragment {
         String nickname = ((EditText) view.findViewById(R.id.etNickname)).getText().toString();
         String number = ((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
         EmergencyContacts contact = new EmergencyContacts();
-        if (nickname.isEmpty() && number.isEmpty()) {
+        if (nickname.isEmpty() || number.isEmpty()) {
             Toast.makeText(getContext(), "Please, fill all the fields", Toast.LENGTH_SHORT).show();
         } else {
             contact.put(EmergencyContacts.USER_KEY, currentUser);

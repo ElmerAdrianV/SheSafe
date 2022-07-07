@@ -3,12 +3,20 @@ package com.elmeradrianv.shesafe.fragments;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,7 +42,7 @@ import java.util.List;
 
 import permissions.dispatcher.NeedsPermission;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
     Location currentLocation;
@@ -89,6 +97,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         getMyLocation();
         queryReports();
+        map.setOnMapLongClickListener(this);
     }
 
     @SuppressWarnings({"MissingPermission"})
@@ -156,11 +165,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void showMarker(String title, double latitude, double longitude, int levelOfRisk) {
         LatLng reportLatLng = new LatLng(latitude, longitude);
-
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(reportLatLng)
                 .title(title).icon(PinAnimation.getNewIconWithLevelOfRisk(levelOfRisk));
         Marker marker = map.addMarker(markerOptions);
         PinAnimation.dropPinEffect(marker);
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Toast.makeText(getContext(), "Detected", Toast.LENGTH_SHORT).show();
+        showAlertDialogForPoint(latLng);
+    }
+
+    private void showAlertDialogForPoint(final LatLng latLng) {
+        // inflate message_item.xml view
+        View messageView = LayoutInflater.from(getContext()).
+                inflate(R.layout.new_report_item, null);
+        // Create alert dialog builder
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        // set message_item.xml to AlertDialog builder
+        alertDialogBuilder.setView(messageView);
+        messageView.findViewById(R.id.ddlTypeOfCrime);
+        EditText etDate = messageView.findViewById(R.id.etDate);
+        DatePickerDialog.OnDateSetListener onDateSetListener = (view, year, month, dayOfMonth) -> {
+            month = month+1;
+            String date = dayOfMonth+"/"+month+"/"+year;
+            etDate.setText(date);
+        };
+        etDate.setOnClickListener(v->
+                {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                            onDateSetListener, 2002, 8, 02);
+                    datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    datePickerDialog.show();
+            });
+
+        // Create alert dialog
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        // Configure dialog button (OK)
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+                (dialog, which) -> {
+                    // Creates and adds marker to the map
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(latLng));
+                    // Animate marker using drop effect
+                    // --> Call the dropPinEffect method here
+                    PinAnimation.dropPinEffect(marker);
+                });
+        // Configure dialog button (Cancel)
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+                (dialog, id) -> dialog.cancel());
+        // Display the dialog
+        alertDialog.show();
     }
 }

@@ -80,7 +80,6 @@ public class ProfileUserFragment extends Fragment {
         setupLogout(view);
         setupAddContact(view);
         setupAdd(view);
-
     }
 
     private void setupChangeProfilePhoto(View view) {

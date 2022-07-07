@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
-import com.elmeradrianv.shesafe.fragments.TableViewFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -97,7 +96,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
             btnCall = itemView.findViewById(R.id.btnCall);
         }
 
-        public void bind(EmergencyContacts contact,Context context) {
+        public void bind(EmergencyContacts contact, Context context) {
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
             btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));

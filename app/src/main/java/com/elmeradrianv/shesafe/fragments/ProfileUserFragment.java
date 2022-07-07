@@ -176,7 +176,6 @@ public class ProfileUserFragment extends Fragment {
         rvReportCard.setLayoutManager(linearLayoutManager);
         adapter = new EmergencyContactsCardAdapter(getContext());
         rvReportCard.setAdapter(adapter);
-        adapter.fetchContacts(5);
         rvReportCard.setItemAnimator(null);
     }
 

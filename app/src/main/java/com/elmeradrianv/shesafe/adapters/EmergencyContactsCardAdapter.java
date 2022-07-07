@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
-import com.elmeradrianv.shesafe.fragments.TableViewFragment;
-import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -27,11 +25,12 @@ import java.util.List;
 public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<EmergencyContactsCardAdapter.ViewHolder> {
     public static final String TAG = "PostAdapter";
     List<EmergencyContacts> contacts;
-    Context context;
+    private Context context;
 
     public EmergencyContactsCardAdapter(Context context) {
         this.contacts = new ArrayList<>();
         this.context = context;
+        fetchContacts();
     }
 
     public void clear() {
@@ -60,11 +59,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
     public void onBindViewHolder(@NonNull EmergencyContactsCardAdapter.ViewHolder holder, int position) {
         //Get the data at position
         EmergencyContacts report = contacts.get(position);
-        try {
-            holder.bind(report);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        holder.bind(report, context);
     }
 
 
@@ -73,12 +68,10 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         return contacts.size();
     }
 
-    public void fetchContacts(int currentLimit) {
+    private void fetchContacts() {
         ParseQuery<EmergencyContacts> query = ParseQuery.getQuery(EmergencyContacts.class);
         query.include(EmergencyContacts.USER_KEY);
-        query.setLimit(currentLimit);
         query.whereEqualTo("user", ParseUser.getCurrentUser());
-        query.setSkip(currentLimit - TableViewFragment.NUMBER_REPORTS_REQUEST); // skip the first 10 results
         query.addDescendingOrder("createdAt");
         query.findInBackground((contactsList, e) -> {
             if (e != null) {
@@ -103,11 +96,11 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
             btnCall = itemView.findViewById(R.id.btnCall);
         }
 
-        public void bind(EmergencyContacts contact) throws ParseException {
+        public void bind(EmergencyContacts contact, Context context) {
             tvNickname.setText(contact.getNickname());
             tvPhoneNumber.setText(contact.getNumber().toString());
             btnDelete.setOnClickListener(v -> deleteEmergencyContact(contact));
-            btnCall.setOnClickListener(v -> makeACall());
+            btnCall.setOnClickListener(v -> makeACall(context));
         }
 
         private void deleteEmergencyContact(EmergencyContacts contact) {
@@ -122,10 +115,9 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
             });
         }
 
-        private void makeACall() {
+        private void makeACall(Context context) {
             context.startActivity(new Intent(Intent.ACTION_CALL)
                     .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
         }
     }
-
 }

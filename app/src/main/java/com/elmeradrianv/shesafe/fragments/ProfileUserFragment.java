@@ -31,22 +31,20 @@ import com.elmeradrianv.shesafe.adapters.EmergencyContactsCardAdapter;
 import com.elmeradrianv.shesafe.auxiliar.MyPair;
 import com.elmeradrianv.shesafe.database.EmergencyContacts;
 import com.elmeradrianv.shesafe.database.User;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.io.File;
 import java.util.HashMap;
 
 
 public class ProfileUserFragment extends Fragment {
-    protected EmergencyContactsCardAdapter adapter;
     public final static int PICK_PHOTO_CODE = 1046;
+    public static final String TAG = ProfileUserFragment.class.getSimpleName();
+    protected EmergencyContactsCardAdapter adapter;
     private ParseUser currentUser = ParseUser.getCurrentUser();
     private ParseFile profilePhoto;
     private ImageView ivProfileView;
-    public static final String TAG = ProfileUserFragment.class.getSimpleName();
 
     public ProfileUserFragment() {
         // Required empty public constructor
@@ -72,60 +70,77 @@ public class ProfileUserFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupRecycleView(view);
+        setupUsername(view);
+        setupProfilePhoto(view);
+        setupChangeProfilePhoto(view);
+        HashMap<String, MyPair<EditText, Boolean>> editUserFields = setupHashMapEditView(view);
+        HashMap<ImageButton, String> buttonsFieldsUser = setupHashMapButtons(view);
+        setupButtonsListeners(buttonsFieldsUser, editUserFields);
+        setupSaveChanges(view, editUserFields);
+        setupLogout(view);
+        setupAddContact(view);
+        setupAdd(view);
+    }
+
+    private void setupChangeProfilePhoto(View view) {
+        view.findViewById(R.id.btnChangeProfilePhoto).setOnClickListener(v -> onPickPhoto());
+    }
+
+    private void setupUsername(View view) {
+        TextView tvUsername = view.findViewById(R.id.tvUsername);
+        tvUsername.setText(currentUser.getUsername());
+    }
+
+    private void setupProfilePhoto(View view) {
         profilePhoto = ParseUser.getCurrentUser().getParseFile(User.PROFILE_PHOTO_KEY);
         ivProfileView = view.findViewById(R.id.ivProfilePhoto);
         putProfileImage();
-        TextView tvUsername = view.findViewById(R.id.tvUsername);
-        view.findViewById(R.id.btnChangeProfilePhoto).setOnClickListener(v -> onPickPhoto());
-        HashMap<String, MyPair<EditText, Boolean>> editUserFields = setupHashMapEditView(view);
-        fillUserFields(editUserFields);
-        HashMap<ImageButton, String> buttonsFieldsUser = setupHashMapButtons(view);
-        setupButtonsListeners(buttonsFieldsUser, editUserFields);
-        view.findViewById(R.id.btnSaveChanges).setOnClickListener(v -> setupSaveChanges(editUserFields));
-        view.findViewById(R.id.btnLogout).setOnClickListener(v -> setupLogout());
-        view.findViewById(R.id.btnAddContact).setOnClickListener(v -> setupAddContact(view));
-        view.findViewById(R.id.btnAdd).setOnClickListener(v -> setupAdd(view));
     }
 
     private void setupAdd(View view) {
-        String nickname=((EditText)view.findViewById(R.id.etNickname)).getText().toString();
-        String number=((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
-        EmergencyContacts contact = new EmergencyContacts();
-        if(nickname.isEmpty() && number.isEmpty()){
-            Toast.makeText(getContext(),"Please, fill all the fields",Toast.LENGTH_SHORT).show();
-        }
-        else{
-            contact.put(EmergencyContacts.USER_KEY,currentUser);
-            contact.put(EmergencyContacts.NICKNAME_KEY,nickname);
-            contact.put(EmergencyContacts.NUMBER_KEY,new Long(number));
-            contact.saveInBackground(e -> {
-                if(e!=null){
-                    Log.e(TAG, "setupAdd: Issue adding contact ",e );
-                }
-                Toast.makeText(getContext(),"Contact saved!!", Toast.LENGTH_SHORT).show();
-                CardView cvNewContact = view.findViewById(R.id.cvNewContact);
-                ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
-                cvNewContact.setVisibility(View.GONE);
-                btnAddContact.setRotation(0);
-                btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
-                adapter.addFirst(contact);
-                ((RecyclerView)view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
-            });
-        }
+        view.findViewById(R.id.btnAdd).setOnClickListener(v -> {
+            String nickname = ((EditText) view.findViewById(R.id.etNickname)).getText().toString();
+            String number = ((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
+            EmergencyContacts contact = new EmergencyContacts();
+            if (nickname.isEmpty() || number.isEmpty()) {
+                Toast.makeText(getContext(), "Please, fill all the fields", Toast.LENGTH_SHORT).show();
+            } else {
+                contact.put(EmergencyContacts.USER_KEY, currentUser);
+                contact.put(EmergencyContacts.NICKNAME_KEY, nickname);
+                contact.put(EmergencyContacts.NUMBER_KEY, new Long(number));
+                contact.saveInBackground(e -> {
+                    if (e != null) {
+                        Log.e(TAG, "setupAdd: Issue adding contact ", e);
+                    } else {
+                        Toast.makeText(getContext(), "Contact saved!!", Toast.LENGTH_SHORT).show();
+                        CardView cvNewContact = view.findViewById(R.id.cvNewContact);
+                        ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
+                        cvNewContact.setVisibility(View.GONE);
+                        btnAddContact.setRotation(0);
+                        btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
+                        adapter.addFirst(contact);
+                        ((RecyclerView) view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
+
+                    }
+                });
+            }
+        });
     }
 
     private void setupAddContact(View view) {
-        CardView cvNewContact = view.findViewById(R.id.cvNewContact);
-        ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
-        if (cvNewContact.getVisibility() == View.VISIBLE) {
-            cvNewContact.setVisibility(View.GONE);
-            btnAddContact.setRotation(0);
-            btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
-        } else {
-            cvNewContact.setVisibility(View.VISIBLE);
-            btnAddContact.setRotation(45);
-            btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.red_ss), android.graphics.PorterDuff.Mode.MULTIPLY);
-        }
+        view.findViewById(R.id.btnAddContact).setOnClickListener(v -> {
+            CardView cvNewContact = view.findViewById(R.id.cvNewContact);
+            ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
+            if (cvNewContact.getVisibility() == View.VISIBLE) {
+                cvNewContact.setVisibility(View.GONE);
+                btnAddContact.setRotation(0);
+                btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
+            } else {
+                cvNewContact.setVisibility(View.VISIBLE);
+                btnAddContact.setRotation(45);
+                btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.red_ss), android.graphics.PorterDuff.Mode.MULTIPLY);
+            }
+        });
     }
 
     private void putProfileImage() {
@@ -136,26 +151,28 @@ public class ProfileUserFragment extends Fragment {
                 .into(ivProfileView);
     }
 
-    private void setupSaveChanges(HashMap<String, MyPair<EditText, Boolean>> editUserFields) {
-        MyPair<EditText, Boolean> pair;
-        for (String key : editUserFields.keySet()) {
-            pair = editUserFields.get(key);
-            if (pair.second) {
-                //if the field was edited...
-                if (pair.first.getText().toString().isEmpty())
-                    Toast.makeText(getContext(), "Please don't let fields empty", Toast.LENGTH_SHORT).show();
-                else
-                    //and the field is not empty, we save the changes
-                    currentUser.put(key, pair.first.getText().toString());
+    private void setupSaveChanges(View view, HashMap<String, MyPair<EditText, Boolean>> editUserFields) {
+        view.findViewById(R.id.btnSaveChanges).setOnClickListener(v -> {
+            MyPair<EditText, Boolean> pair;
+            for (String key : editUserFields.keySet()) {
+                pair = editUserFields.get(key);
+                if (pair.second) {
+                    //if the field was edited...
+                    if (pair.first.getText().toString().isEmpty())
+                        Toast.makeText(getContext(), "Please don't let fields empty", Toast.LENGTH_SHORT).show();
+                    else
+                        //and the field is not empty, we save the changes
+                        currentUser.put(key, pair.first.getText().toString());
+                }
             }
-        }
-        currentUser.saveInBackground(e -> {
-            if (e != null)
-                Log.e(TAG, "done: Error saving user changes", e);
-            else {
-                Toast.makeText(getContext(), "Changes saved", Toast.LENGTH_SHORT).show();
-                resetFields(editUserFields);
-            }
+            currentUser.saveInBackground(e -> {
+                if (e != null)
+                    Log.e(TAG, "done: Error saving user changes", e);
+                else {
+                    Toast.makeText(getContext(), "Changes saved", Toast.LENGTH_SHORT).show();
+                    resetFields(editUserFields);
+                }
+            });
         });
     }
 
@@ -177,21 +194,21 @@ public class ProfileUserFragment extends Fragment {
         rvReportCard.setLayoutManager(linearLayoutManager);
         adapter = new EmergencyContactsCardAdapter(getContext());
         rvReportCard.setAdapter(adapter);
-        adapter.fetchContacts(5);
         rvReportCard.setItemAnimator(null);
     }
 
-    private void setupLogout() {
-        ParseUser.logOut();
-        Intent intent = new Intent(getContext(), LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // this makes sure the Back button won't work
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // same as above
-        startActivity(intent);
+    private void setupLogout(View view) {
+        view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
+            ParseUser.logOut();
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // this makes sure the Back button won't work
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // same as above
+            startActivity(intent);
+        });
     }
 
     private HashMap<String, MyPair<EditText, Boolean>> setupHashMapEditView(View view) {
         HashMap<String, MyPair<EditText, Boolean>> editUserFields = new HashMap<>();
-
         editUserFields.put(User.FIRST_NAME_KEY, new MyPair<>(view.findViewById(R.id.etFirstName), false));
         editUserFields.put(User.LAST_NAME_KEY, new MyPair<>(view.findViewById(R.id.etLastName), false));
         editUserFields.put(User.EMAIL_KEY, new MyPair<>(view.findViewById(R.id.etEmail), false));
@@ -199,6 +216,7 @@ public class ProfileUserFragment extends Fragment {
         editUserFields.put(User.PASSWORD_KEY, new MyPair<>(view.findViewById(R.id.etPassword), false));
         editUserFields.put(User.EMERGENCY_MESSAGE_KEY, new MyPair<>(view.findViewById(R.id.etEmergencyMessage), false));
 
+        fillUserFields(editUserFields);
         return editUserFields;
     }
 

@@ -8,9 +8,9 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="8dp"
     app:cardMaxElevation="10dp"
-    app:contentPaddingBottom="8dp"
     app:cardPreventCornerOverlap="true"
-    app:cardUseCompatPadding="true">
+    app:cardUseCompatPadding="true"
+    app:contentPaddingBottom="8dp">
 
     <RelativeLayout
         android:layout_width="match_parent"

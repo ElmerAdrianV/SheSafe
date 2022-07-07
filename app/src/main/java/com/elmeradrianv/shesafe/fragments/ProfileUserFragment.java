@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,10 +42,9 @@ import java.util.HashMap;
 public class ProfileUserFragment extends Fragment {
     public final static int PICK_PHOTO_CODE = 1046;
     public static final String TAG = ProfileUserFragment.class.getSimpleName();
-    protected EmergencyContactsCardAdapter adapter;
+
     private ParseUser currentUser = ParseUser.getCurrentUser();
     private ParseFile profilePhoto;
-    private ImageView ivProfileView;
 
     public ProfileUserFragment() {
         // Required empty public constructor
@@ -69,9 +69,10 @@ public class ProfileUserFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setupRecycleView(view);
+        EmergencyContactsCardAdapter adapter = new EmergencyContactsCardAdapter(getContext());;
+        setupRecycleView(view,adapter);
         setupUsername(view);
-        setupProfilePhoto(view);
+        setupProfilePhoto();
         setupChangeProfilePhoto(view);
         HashMap<String, MyPair<EditText, Boolean>> editUserFields = setupHashMapEditView(view);
         HashMap<ImageButton, String> buttonsFieldsUser = setupHashMapButtons(view);
@@ -79,7 +80,8 @@ public class ProfileUserFragment extends Fragment {
         setupSaveChanges(view, editUserFields);
         setupLogout(view);
         setupAddContact(view);
-        setupAdd(view);
+        setupAdd(view,adapter);
+
     }
 
     private void setupChangeProfilePhoto(View view) {
@@ -91,13 +93,12 @@ public class ProfileUserFragment extends Fragment {
         tvUsername.setText(currentUser.getUsername());
     }
 
-    private void setupProfilePhoto(View view) {
-        profilePhoto = ParseUser.getCurrentUser().getParseFile(User.PROFILE_PHOTO_KEY);
-        ivProfileView = view.findViewById(R.id.ivProfilePhoto);
+    private void setupProfilePhoto() {
+        profilePhoto = currentUser.getParseFile(User.PROFILE_PHOTO_KEY);
         putProfileImage();
     }
 
-    private void setupAdd(View view) {
+    private void setupAdd(View view, EmergencyContactsCardAdapter adapter) {
         view.findViewById(R.id.btnAdd).setOnClickListener(v -> {
             String nickname = ((EditText) view.findViewById(R.id.etNickname)).getText().toString();
             String number = ((EditText) view.findViewById(R.id.etPhoneNumber)).getText().toString();
@@ -148,15 +149,14 @@ public class ProfileUserFragment extends Fragment {
         Glide.with(getContext()).load(profilePhoto.getUrl())
                 .fitCenter() // scale image to fill the entire ImageView
                 .transform(new RoundedCorners(radius))
-                .into(ivProfileView);
+                .into((ImageView) getView().findViewById(R.id.ivProfilePhoto));
     }
 
     private void setupSaveChanges(View view, HashMap<String, MyPair<EditText, Boolean>> editUserFields) {
         view.findViewById(R.id.btnSaveChanges).setOnClickListener(v -> {
-            MyPair<EditText, Boolean> pair;
             for (String key : editUserFields.keySet()) {
-                pair = editUserFields.get(key);
-                if (pair.second) {
+                MyPair<EditText, Boolean> pair = editUserFields.get(key);
+                if (pair.second) {//ask if was edit
                     //if the field was edited...
                     if (pair.first.getText().toString().isEmpty())
                         Toast.makeText(getContext(), "Please don't let fields empty", Toast.LENGTH_SHORT).show();
@@ -187,12 +187,11 @@ public class ProfileUserFragment extends Fragment {
         }
     }
 
-    private void setupRecycleView(View view) {
+    private void setupRecycleView(View view,EmergencyContactsCardAdapter adapter) {
         RecyclerView rvReportCard = view.findViewById(R.id.rvEmergencyContacts);
         rvReportCard.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         rvReportCard.setLayoutManager(linearLayoutManager);
-        adapter = new EmergencyContactsCardAdapter(getContext());
         rvReportCard.setAdapter(adapter);
         rvReportCard.setItemAnimator(null);
     }

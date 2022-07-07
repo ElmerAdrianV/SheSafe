@@ -99,14 +99,16 @@ public class ProfileUserFragment extends Fragment {
                 if (e != null) {
                     Log.e(TAG, "setupAdd: Issue adding contact ", e);
                 }
-                Toast.makeText(getContext(), "Contact saved!!", Toast.LENGTH_SHORT).show();
-                CardView cvNewContact = view.findViewById(R.id.cvNewContact);
-                ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
-                cvNewContact.setVisibility(View.GONE);
-                btnAddContact.setRotation(0);
-                btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
-                adapter.addFirst(contact);
-                ((RecyclerView) view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
+                else {
+                    Toast.makeText(getContext(), "Contact saved!!", Toast.LENGTH_SHORT).show();
+                    CardView cvNewContact = view.findViewById(R.id.cvNewContact);
+                    ImageButton btnAddContact = view.findViewById(R.id.btnAddContact);
+                    cvNewContact.setVisibility(View.GONE);
+                    btnAddContact.setRotation(0);
+                    btnAddContact.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue_cute), android.graphics.PorterDuff.Mode.MULTIPLY);
+                    adapter.addFirst(contact);
+                    ((RecyclerView) view.findViewById(R.id.rvEmergencyContacts)).smoothScrollToPosition(0);
+                }
             });
         }
     }

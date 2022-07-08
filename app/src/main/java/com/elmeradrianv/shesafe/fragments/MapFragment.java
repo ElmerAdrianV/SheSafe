@@ -14,8 +14,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.auxiliar.PinAnimation;
 import com.elmeradrianv.shesafe.database.Report;
+import com.elmeradrianv.shesafe.database.TypeOfCrime;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
@@ -47,7 +49,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private final static String KEY_LOCATION = "location";
     Location currentLocation;
     private GoogleMap map;
-    private LocationRequest locationRequest;
+    private List<TypeOfCrime> typesOfCrime;
 
     public MapFragment() {
         // Required empty public constructor
@@ -97,6 +99,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         getMyLocation();
         queryReports();
+        typesOfCrime=queryTypeOfCrimes();
+        populateSpinner();
         map.setOnMapLongClickListener(this);
     }
 
@@ -179,14 +183,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void showAlertDialogForPoint(final LatLng latLng) {
-        // inflate message_item.xml view
         View messageView = LayoutInflater.from(getContext()).
                 inflate(R.layout.new_report_item, null);
-        // Create alert dialog builder
+        setupEditDate(messageView);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-        // set message_item.xml to AlertDialog builder
         alertDialogBuilder.setView(messageView);
-        messageView.findViewById(R.id.ddlTypeOfCrime);
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+                (dialog, which) -> {
+                    showMarker("Robbery", latLng.latitude, latLng.longitude,1);
+                });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+                (dialog, id) -> dialog.cancel());
+        alertDialog.show();
+    }
+
+    public void populateSpinner(){
+        List<String> list = new ArrayList<String>();
+        View messageView = LayoutInflater.from(getContext()).
+                inflate(R.layout.new_report_item, null);
+        for(TypeOfCrime crime: typesOfCrime){
+            list.add(crime.get(TypeOfCrime.TAG_KEY).toString());
+        }
+        Spinner typesOfCrime = (Spinner) messageView.findViewById(R.id.sTypeOfCrime);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typesOfCrime.setAdapter(adapter);
+    }
+    private List<TypeOfCrime> queryTypeOfCrimes() {
+        List<TypeOfCrime> crimes = new ArrayList<>();
+        ParseQuery<TypeOfCrime> query = ParseQuery.getQuery(TypeOfCrime.class);
+        query.addDescendingOrder(TypeOfCrime.LEVEL_OF_RISK_KEY);
+        query.findInBackground((crimesList, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with getting posts", e);
+                return;
+            }
+            else {
+                crimes.addAll(crimes);
+            }
+        });
+        return crimes;
+    }
+
+    private void setupEditDate(View messageView) {
+        messageView.findViewById(R.id.sTypeOfCrime);
         EditText etDate = messageView.findViewById(R.id.etDate);
         DatePickerDialog.OnDateSetListener onDateSetListener = (view, year, month, dayOfMonth) -> {
             month = month+1;
@@ -194,29 +235,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             etDate.setText(date);
         };
         etDate.setOnClickListener(v->
-                {
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                            onDateSetListener, 2002, 8, 02);
-                    datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    datePickerDialog.show();
-            });
-
-        // Create alert dialog
-        final AlertDialog alertDialog = alertDialogBuilder.create();
-        // Configure dialog button (OK)
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
-                (dialog, which) -> {
-                    // Creates and adds marker to the map
-                    Marker marker = map.addMarker(new MarkerOptions()
-                            .position(latLng));
-                    // Animate marker using drop effect
-                    // --> Call the dropPinEffect method here
-                    PinAnimation.dropPinEffect(marker);
-                });
-        // Configure dialog button (Cancel)
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
-                (dialog, id) -> dialog.cancel());
-        // Display the dialog
-        alertDialog.show();
+        {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                    onDateSetListener, 2004, 8, 02);
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.show();
+        });
     }
 }

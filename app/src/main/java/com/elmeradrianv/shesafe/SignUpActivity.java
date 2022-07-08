@@ -29,7 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
     // PICK_PHOTO_CODE is a constant integer
     public final static int PICK_PHOTO_CODE = 1046;
     private static final String TAG = SignUpActivity.class.getSimpleName();
-    private ParseFile profilePhoto=null;
+    private ParseFile profilePhoto = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +62,16 @@ public class SignUpActivity extends AppCompatActivity {
             String personalDescription = etPersonalDescription.getText().toString();
             String password = etPassword.getText().toString();
             String passwordConfirm = etPasswordConfirm.getText().toString();
+            boolean allFieldsFill = false;
             if (username.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || personalDescription.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
                 Toast.makeText(this, "Please fill all the fields", Toast.LENGTH_SHORT).show();
             } else {
-                if (! password.equals(passwordConfirm))
-                    Toast.makeText(this, "Password doesn't matched", Toast.LENGTH_SHORT).show();
-                 else
-                    signupNewUser(username, firstName, lastName, email, personalDescription, password);
+                allFieldsFill = true;
+            }
+            if (allFieldsFill && !password.equals(passwordConfirm)) {
+                Toast.makeText(this, "Password doesn't matched", Toast.LENGTH_SHORT).show();
+            } else {
+                signupNewUser(username, firstName, lastName, email, personalDescription, password);
             }
         });
     }
@@ -88,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity {
                 Log.e(TAG, "signupNewUser: Signup error", error);
                 return;
             }
-            if (profilePhoto==null) {
+            if (profilePhoto == null) {
                 user.put(User.PROFILE_PHOTO_KEY, profilePhoto);
                 user.saveInBackground((SaveCallback) error1 -> {
                     if (error1 != null) {

@@ -18,9 +18,9 @@
         android:layout_width="342dp"
         android:layout_height="105dp"
         android:layout_below="@+id/dropdown_type_of_crime"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="36dp"
         android:background="@drawable/edit_text_background"
-        android:layout_centerHorizontal="true"
 
         android:ems="10"
         android:gravity="start|top"
@@ -33,13 +33,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/etDescription"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="127dp"
         android:background="@drawable/edit_text_background"
-        android:layout_centerHorizontal="true"
 
         tools:layout_editor_absoluteX="30dp"
         tools:layout_editor_absoluteY="317dp" />
-
 
 
 </RelativeLayout>

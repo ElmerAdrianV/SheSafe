@@ -19,10 +19,8 @@ import com.elmeradrianv.shesafe.auxiliar.EndlessRecyclerViewScrollListener;
 
 public class TableViewFragment extends Fragment {
     public static final String TAG = TableViewFragment.class.getSimpleName();
-    protected ReportCardAdapter adapter;
     public static final int NUMBER_REPORTS_REQUEST = 20;
-
-
+    protected ReportCardAdapter adapter;
     // Store a member variable for the listener
     private EndlessRecyclerViewScrollListener scrollListener;
     private int currentOffset = NUMBER_REPORTS_REQUEST;//Count number of posts in the timeline
@@ -52,17 +50,17 @@ public class TableViewFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SwipeRefreshLayout swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        SwipeRefreshLayout swipeContainer = view.findViewById(R.id.swipeContainer);
         createSwipeRefresh(swipeContainer);
 
-        RecyclerView rvReportCard = (RecyclerView) view.findViewById(R.id.rvReportCards);
+        RecyclerView rvReportCard = view.findViewById(R.id.rvReportCards);
 
         rvReportCard.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         rvReportCard.setLayoutManager(linearLayoutManager);
-        adapter = new ReportCardAdapter(getContext());
+        adapter = new ReportCardAdapter();
         rvReportCard.setAdapter(adapter);
-        adapter.showReports(currentOffset);
+        adapter.fetchReports(currentOffset,NUMBER_REPORTS_REQUEST);
         rvReportCard.setItemAnimator(null);
         // Retain an instance so that you can call `resetState()` for fresh searches
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -79,14 +77,14 @@ public class TableViewFragment extends Fragment {
 
     private void fetchFeedAsync() {
         adapter.clear();
-        adapter.showReports(NUMBER_REPORTS_REQUEST);
+        adapter.fetchReports(NUMBER_REPORTS_REQUEST,NUMBER_REPORTS_REQUEST);
         currentOffset = NUMBER_REPORTS_REQUEST;
     }
 
     // Append the next page of data into the adapter
     // This method probably sends out a network request and appends new data items to your adapter.
     public void loadNextDataFromApi(int offset) {
-        adapter.showReports(currentOffset + NUMBER_REPORTS_REQUEST);
+        adapter.fetchReports(currentOffset + NUMBER_REPORTS_REQUEST,NUMBER_REPORTS_REQUEST);
         int itemCountAdded = adapter.getItemCount() - currentOffset - 1;
         adapter.notifyItemRangeInserted(currentOffset, itemCountAdded);
         currentOffset += NUMBER_REPORTS_REQUEST;

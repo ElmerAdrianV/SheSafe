@@ -1,6 +1,5 @@
 package com.elmeradrianv.shesafe.adapters;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,11 +21,9 @@ import java.util.List;
 public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.ViewHolder> {
     public static final String TAG = "PostAdapter";
     List<Report> reports;
-    Context context;
 
-    public ReportCardAdapter(Context context) {
+    public ReportCardAdapter() {
         this.reports = new ArrayList<>();
-        this.context = context;
     }
 
     public void clear() {
@@ -42,7 +39,7 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
     @NonNull
     @Override
     public ReportCardAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.report_card_view, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.report_card_view, parent, false);
         return new ViewHolder(view);
     }
 
@@ -63,6 +60,21 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
         return reports.size();
     }
 
+    public void fetchReports(int currentLimit,int numberReportsRequest) {
+        ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
+        query.include(Report.TYPE_OF_CRIME_KEY);
+        query.setLimit(currentLimit);
+        query.setSkip(currentLimit - numberReportsRequest);
+        query.addDescendingOrder("createdAt");
+        query.findInBackground((reportList, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with getting reports", e);
+                return;
+            }
+            this.addAll(reportList);
+        });
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvDescription;
         TextView tvTypeOfCrime;
@@ -80,21 +92,6 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
             tvDate.setText(report.getDate().toString());
             tvTypeOfCrime.setText(report.getTypeOfCrime().getTag());
         }
-    }
-    public void showReports(int currentLimit) {
-        List<Report> reports = new ArrayList<>();
-        ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
-        query.include(Report.TYPE_OF_CRIME_KEY);
-        query.setLimit(currentLimit);
-        query.setSkip(currentLimit- TableViewFragment.NUMBER_REPORTS_REQUEST); // skip the first 10 results
-        query.addDescendingOrder("createdAt");
-        query.findInBackground((reportList, e) -> {
-            if (e != null) {
-                Log.e(TAG, "Issue with getting posts", e);
-                return;
-            }
-            this.addAll(reportList);
-        });
     }
 
 }

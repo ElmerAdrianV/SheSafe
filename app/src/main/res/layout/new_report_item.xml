@@ -32,6 +32,7 @@
 
         <Spinner
             android:id="@+id/sTypeOfCrime"
+            android:scrollbarAlwaysDrawHorizontalTrack="true"
             android:layout_width="match_parent"
             android:layout_height="44dp"
             android:layout_below="@+id/textView4"
@@ -54,12 +55,11 @@
             android:layout_marginTop="21dp"
             android:layout_marginEnd="@dimen/separation_border_parent"
             android:ems="10"
-            android:hint="Description"
+            android:hint="@string/description"
             android:inputType="textMultiLine|textPersonName" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilDate"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/etDescription"
@@ -68,17 +68,9 @@
             android:layout_marginStart="@dimen/separation_border_parent"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="@dimen/separation_border_parent"
-            android:hint="Date"
-            app:endIconMode="clear_text"
-            >
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                android:maxLength="51" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:hint="@string/date"
+            android:inputType="none"
+            android:maxLength="51" />
 
     </RelativeLayout>
 

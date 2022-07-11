@@ -34,23 +34,4 @@ public class Report extends ParseObject {
         return (ParseGeoPoint) get(LOCATION_KEY);
     }
 
-    public void setDescription() {
-        getString(DESCRIPTION_KEY);
-    }
-
-    public void setDate() {
-        getDate(DATE_KEY);
-    }
-
-    public void setUser() {
-        get(USER_KEY);
-    }
-
-    public void setTypeOfCrime() {
-        get(TYPE_OF_CRIME_KEY);
-    }
-
-    public void setLocation() {
-        get(LOCATION_KEY);
-    }
 }

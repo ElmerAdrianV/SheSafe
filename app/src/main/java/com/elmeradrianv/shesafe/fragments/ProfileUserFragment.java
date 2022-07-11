@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +68,9 @@ public class ProfileUserFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        EmergencyContactsCardAdapter adapter = new EmergencyContactsCardAdapter(getContext());;
-        setupRecycleView(view,adapter);
+        EmergencyContactsCardAdapter adapter = new EmergencyContactsCardAdapter(getContext());
+        ;
+        setupRecycleView(view, adapter);
         setupUsername(view);
         setupProfilePhoto();
         setupChangeProfilePhoto(view);
@@ -80,7 +80,7 @@ public class ProfileUserFragment extends Fragment {
         setupSaveChanges(view, editUserFields);
         setupLogout(view);
         setupAddContact(view);
-        setupAdd(view,adapter);
+        setupAdd(view, adapter);
 
     }
 
@@ -187,7 +187,7 @@ public class ProfileUserFragment extends Fragment {
         }
     }
 
-    private void setupRecycleView(View view,EmergencyContactsCardAdapter adapter) {
+    private void setupRecycleView(View view, EmergencyContactsCardAdapter adapter) {
         RecyclerView rvReportCard = view.findViewById(R.id.rvEmergencyContacts);
         rvReportCard.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

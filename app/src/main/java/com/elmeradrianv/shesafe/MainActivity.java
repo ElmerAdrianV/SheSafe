@@ -11,7 +11,6 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -29,6 +28,7 @@ import permissions.dispatcher.NeedsPermission;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     public void sendEmergencyMessages(Location location) {
         ParseQuery<EmergencyContacts> query = ParseQuery.getQuery(EmergencyContacts.class);
         query.include(EmergencyContacts.USER_KEY);
@@ -66,14 +67,14 @@ public class MainActivity extends AppCompatActivity {
             }
             SmsManager smsManager = SmsManager.getDefault();
             String message = ParseUser.getCurrentUser().get(User.EMERGENCY_MESSAGE_KEY).toString() +
-                    " I'm in https://google.com/maps?q="+location.getLatitude()+","+location.getLongitude();
-            for(EmergencyContacts contact: contactsList){
+                    " I'm in https://google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
+            for (EmergencyContacts contact : contactsList) {
                 smsManager.sendTextMessage(contact.getNumber().toString(),
                         null,
                         message,
                         null, null);
             }
-            Toast.makeText(this,"Your emergency message was sent to all yours emergency contacts", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Your emergency message was sent to all yours emergency contacts", Toast.LENGTH_LONG).show();
         });
     }
 

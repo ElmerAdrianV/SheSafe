@@ -28,7 +28,6 @@ import com.elmeradrianv.shesafe.auxiliar.PinAnimation;
 import com.elmeradrianv.shesafe.database.Report;
 import com.elmeradrianv.shesafe.database.TypeOfCrime;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,9 +36,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import permissions.dispatcher.NeedsPermission;
@@ -49,7 +53,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private final static String KEY_LOCATION = "location";
     Location currentLocation;
     private GoogleMap map;
-    private List<TypeOfCrime> typesOfCrime;
+
 
     public MapFragment() {
         // Required empty public constructor
@@ -99,8 +103,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         getMyLocation();
         queryReports();
-        typesOfCrime=queryTypeOfCrimes();
-        populateSpinner();
         map.setOnMapLongClickListener(this);
     }
 
@@ -149,7 +151,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         query.addDescendingOrder("createdAt");
         query.findInBackground((reportList, e) -> {
             if (e != null) {
-                Log.e(TAG, "Issue with getting posts", e);
+                Log.e(TAG, "Issue with getting reports", e);
                 return;
             }
             reports.addAll(reportList);
@@ -188,57 +190,95 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         setupEditDate(messageView);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setView(messageView);
+        HashMap<String, TypeOfCrime> crimes = new HashMap<>();
+        queryTypeOfCrimes(messageView, crimes);
+
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
                 (dialog, which) -> {
-                    showMarker("Robbery", latLng.latitude, latLng.longitude,1);
+
+                    EditText etDescription = messageView.findViewById(R.id.etDescription);
+                    if (etDescription.getText().toString().isEmpty()) {
+                        Toast.makeText(getContext(), "Please fill the description", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Spinner spinnerCrimes = messageView.findViewById(R.id.sTypeOfCrime);
+                        TypeOfCrime crime = crimes.get(spinnerCrimes.getSelectedItem().toString());
+                        Report report = new Report();
+                        report.put(Report.DESCRIPTION_KEY, etDescription.getText().toString());
+                        String[] pickedDate = ((EditText) messageView.findViewById(R.id.etDate)).getText().toString().split("/");
+                        //pickedString has the american order date position= mounth in position0, day in position 1 and year in position 2
+                        Date date = new Date(Integer.parseInt(pickedDate[2]) - 1900, Integer.parseInt(pickedDate[0]) - 1, Integer.parseInt(pickedDate[1]));
+                        report.put(Report.DATE_KEY, date);
+                        report.put(Report.USER_KEY, ParseUser.getCurrentUser());
+                        report.put(Report.LOCATION_KEY, new ParseGeoPoint(latLng.latitude, latLng.longitude));
+                        report.put(Report.TYPE_OF_CRIME_KEY, crime);
+                        report.saveInBackground(e -> {
+                            if (e != null) {
+                                Log.e(TAG, "showAlertDialogForPoint: exception", e);
+                            } else {
+                                Log.i(TAG, "showAlertDialogForPoint: report saved");
+                            }
+                        });
+                        showMarker(crime.getTag(), latLng.latitude, latLng.longitude, crime.getLevelOfRisk());
+                    }
                 });
         alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
                 (dialog, id) -> dialog.cancel());
         alertDialog.show();
     }
 
-    public void populateSpinner(){
-        List<String> list = new ArrayList<String>();
-        View messageView = LayoutInflater.from(getContext()).
-                inflate(R.layout.new_report_item, null);
-        for(TypeOfCrime crime: typesOfCrime){
+    public void populateSpinner(List<TypeOfCrime> crimesList, HashMap<String, TypeOfCrime> crimes, View messageView) {
+        List<String> list = new ArrayList<>();
+        for (TypeOfCrime crime : crimesList) {
+            crimes.put(crime.getTag(), crime);
+        }
+        for (TypeOfCrime crime : crimesList) {
             list.add(crime.get(TypeOfCrime.TAG_KEY).toString());
         }
-        Spinner typesOfCrime = (Spinner) messageView.findViewById(R.id.sTypeOfCrime);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,list);
+        Spinner typesOfCrime = messageView.findViewById(R.id.sTypeOfCrime);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typesOfCrime.setAdapter(adapter);
+        typesOfCrime.setSelection(0);
     }
-    private List<TypeOfCrime> queryTypeOfCrimes() {
-        List<TypeOfCrime> crimes = new ArrayList<>();
+
+    private void queryTypeOfCrimes(View messageView, HashMap<String, TypeOfCrime> crimes) {
         ParseQuery<TypeOfCrime> query = ParseQuery.getQuery(TypeOfCrime.class);
         query.addDescendingOrder(TypeOfCrime.LEVEL_OF_RISK_KEY);
         query.findInBackground((crimesList, e) -> {
             if (e != null) {
-                Log.e(TAG, "Issue with getting posts", e);
+                Log.e(TAG, "Issue with getting crimes", e);
                 return;
-            }
-            else {
-                crimes.addAll(crimes);
+            } else {
+                populateSpinner(crimesList, crimes, messageView);
             }
         });
-        return crimes;
     }
 
     private void setupEditDate(View messageView) {
+
         messageView.findViewById(R.id.sTypeOfCrime);
         EditText etDate = messageView.findViewById(R.id.etDate);
         DatePickerDialog.OnDateSetListener onDateSetListener = (view, year, month, dayOfMonth) -> {
-            month = month+1;
-            String date = dayOfMonth+"/"+month+"/"+year;
+            month = month + 1;
+            String date = month + "/" + dayOfMonth + "/" + year;
             etDate.setText(date);
         };
-        etDate.setOnClickListener(v->
-        {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                    onDateSetListener, 2004, 8, 02);
-            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        LocalDateTime today = LocalDateTime.now();
+        int month = today.getMonth().getValue();
+        int dayOfMonth = today.getDayOfMonth();
+        int year = today.getYear();
+        String date = month + "/" + dayOfMonth + "/" + year;
+        etDate.setText(date);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(MapFragment.this.getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                onDateSetListener, year, month, dayOfMonth);
+        datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        etDate.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                datePickerDialog.show();
+            }
+        });
+        etDate.setOnClickListener(v -> {
             datePickerDialog.show();
         });
     }

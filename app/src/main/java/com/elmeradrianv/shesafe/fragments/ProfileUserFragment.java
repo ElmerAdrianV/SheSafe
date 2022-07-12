@@ -69,7 +69,6 @@ public class ProfileUserFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         EmergencyContactsCardAdapter adapter = new EmergencyContactsCardAdapter(getContext());
-        ;
         setupRecycleView(view, adapter);
         setupUsername(view);
         setupProfilePhoto();

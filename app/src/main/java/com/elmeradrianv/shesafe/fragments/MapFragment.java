@@ -231,8 +231,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         List<String> list = new ArrayList<>();
         for (TypeOfCrime crime : crimesList) {
             crimes.put(crime.getTag(), crime);
-        }
-        for (TypeOfCrime crime : crimesList) {
             list.add(crime.get(TypeOfCrime.TAG_KEY).toString());
         }
         Spinner typesOfCrime = messageView.findViewById(R.id.sTypeOfCrime);

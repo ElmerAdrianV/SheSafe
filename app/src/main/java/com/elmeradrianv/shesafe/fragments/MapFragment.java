@@ -43,7 +43,9 @@ import com.parse.ParseUser;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -276,14 +278,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             String date = month + "/" + dayOfMonth + "/" + year;
             etDate.setText(date);
         };
-        LocalDateTime today = LocalDateTime.now();
-        int month = today.getMonth().getValue();
-        int dayOfMonth = today.getDayOfMonth();
-        int year = today.getYear();
-        String date = month + "/" + dayOfMonth + "/" + year;
-        etDate.setText(date);
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        String stringDate = date.format(formatter);
+        etDate.setText(stringDate);
         DatePickerDialog datePickerDialog = new DatePickerDialog(MapFragment.this.getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                onDateSetListener, year, month, dayOfMonth);
+                onDateSetListener, date.getYear(), date.getMonthValue()+1, date.getDayOfMonth());
         datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         etDate.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {

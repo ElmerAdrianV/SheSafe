@@ -44,7 +44,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -205,20 +204,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     if (etDescription.getText().toString().isEmpty()) {
                         Toast.makeText(getContext(), "Please fill the description", Toast.LENGTH_SHORT).show();
                     } else {
-                        Spinner spinnerCrimes = messageView.findViewById(R.id.sTypeOfCrime);
-                        TypeOfCrime crime = crimes.get(spinnerCrimes.getSelectedItem().toString());
-                        EditText etDate = messageView.findViewById(R.id.etDate);
-                        DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); // Make sure user insert date into edittext in this format.
-                        try {
-                            Date dateObject;
-                            String dob_var = (etDate.getText().toString());
-                            dateObject = formatter.parse(dob_var);
-                            String date = new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
-                            createReport(etDescription.getText().toString(), dateObject, new ParseGeoPoint(latLng.latitude, latLng.longitude), crime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        showMarker(crime.getTag(), latLng.latitude, latLng.longitude, crime.getLevelOfRisk());
+                        createReport(messageView, latLng, crimes);
                     }
                 });
         alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
@@ -226,7 +212,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         alertDialog.show();
     }
 
-    private void createReport(String description, Date date, ParseGeoPoint location, TypeOfCrime crime) {
+    private void createReport(View messageView, LatLng latLng, HashMap<String, TypeOfCrime> crimes) {
+        Spinner spinnerCrimes = messageView.findViewById(R.id.sTypeOfCrime);
+        TypeOfCrime crime = crimes.get(spinnerCrimes.getSelectedItem().toString());
+        EditText etDate = messageView.findViewById(R.id.etDate);
+        EditText etDescription = messageView.findViewById(R.id.etDescription);
+        DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); // Make sure user insert date into edittext in this format.
+        try {
+            Date dateObject;
+            String dob_var = (etDate.getText().toString());
+            dateObject = formatter.parse(dob_var);
+            String date = new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
+            saveReportInDataBase(etDescription.getText().toString(), dateObject, new ParseGeoPoint(latLng.latitude, latLng.longitude), crime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        showMarker(crime.getTag(), latLng.latitude, latLng.longitude, crime.getLevelOfRisk());
+    }
+
+    private void saveReportInDataBase(String description, Date date, ParseGeoPoint location, TypeOfCrime crime) {
         Report report = new Report();
         report.put(Report.DESCRIPTION_KEY, description);
         report.put(Report.DATE_KEY, date);
@@ -283,7 +287,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         String stringDate = date.format(formatter);
         etDate.setText(stringDate);
         DatePickerDialog datePickerDialog = new DatePickerDialog(MapFragment.this.getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                onDateSetListener, date.getYear(), date.getMonthValue()+1, date.getDayOfMonth());
+                onDateSetListener, date.getYear(), date.getMonthValue() + 1, date.getDayOfMonth());
         datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         etDate.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {

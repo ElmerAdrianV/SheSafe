@@ -40,6 +40,9 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -196,29 +199,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
                 (dialog, which) -> {
-
                     EditText etDescription = messageView.findViewById(R.id.etDescription);
                     if (etDescription.getText().toString().isEmpty()) {
                         Toast.makeText(getContext(), "Please fill the description", Toast.LENGTH_SHORT).show();
                     } else {
                         Spinner spinnerCrimes = messageView.findViewById(R.id.sTypeOfCrime);
                         TypeOfCrime crime = crimes.get(spinnerCrimes.getSelectedItem().toString());
-                        Report report = new Report();
-                        report.put(Report.DESCRIPTION_KEY, etDescription.getText().toString());
-                        String[] pickedDate = ((EditText) messageView.findViewById(R.id.etDate)).getText().toString().split("/");
-                        //pickedString has the american order date position= mounth in position0, day in position 1 and year in position 2
-                        Date date = new Date(Integer.parseInt(pickedDate[2]) - 1900, Integer.parseInt(pickedDate[0]) - 1, Integer.parseInt(pickedDate[1]));
-                        report.put(Report.DATE_KEY, date);
-                        report.put(Report.USER_KEY, ParseUser.getCurrentUser());
-                        report.put(Report.LOCATION_KEY, new ParseGeoPoint(latLng.latitude, latLng.longitude));
-                        report.put(Report.TYPE_OF_CRIME_KEY, crime);
-                        report.saveInBackground(e -> {
-                            if (e != null) {
-                                Log.e(TAG, "showAlertDialogForPoint: exception", e);
-                            } else {
-                                Log.i(TAG, "showAlertDialogForPoint: report saved");
-                            }
-                        });
+                        EditText etDate = messageView.findViewById(R.id.etDate);
+                        DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); // Make sure user insert date into edittext in this format.
+                        try {
+                            Date dateObject;
+                            String dob_var = (etDate.getText().toString());
+                            dateObject = formatter.parse(dob_var);
+                            String date = new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
+                            createReport(etDescription.getText().toString(), dateObject, new ParseGeoPoint(latLng.latitude, latLng.longitude), crime);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         showMarker(crime.getTag(), latLng.latitude, latLng.longitude, crime.getLevelOfRisk());
                     }
                 });
@@ -226,6 +223,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 (dialog, id) -> dialog.cancel());
         alertDialog.show();
     }
+
+    private void createReport(String description, Date date, ParseGeoPoint location, TypeOfCrime crime) {
+        Report report = new Report();
+        report.put(Report.DESCRIPTION_KEY, description);
+        report.put(Report.DATE_KEY, date);
+        report.put(Report.USER_KEY, ParseUser.getCurrentUser());
+        report.put(Report.LOCATION_KEY, location);
+        report.put(Report.TYPE_OF_CRIME_KEY, crime);
+        report.saveInBackground(e -> {
+            if (e != null) {
+                Log.e(TAG, "showAlertDialogForPoint: exception", e);
+            } else {
+                Log.i(TAG, "showAlertDialogForPoint: report saved");
+            }
+        });
+    }
+
 
     public void populateSpinner(List<TypeOfCrime> crimesList, HashMap<String, TypeOfCrime> crimes, View messageView) {
         List<String> list = new ArrayList<>();

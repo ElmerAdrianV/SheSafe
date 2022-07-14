@@ -20,5 +20,4 @@ public class TypeOfCrime extends ParseObject {
     public int getLevelOfRisk() {
         return getInt(LEVEL_OF_RISK_KEY);
     }
-
 }

@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmeradrianv.shesafe.R;
 import com.elmeradrianv.shesafe.database.Report;
-import com.elmeradrianv.shesafe.fragments.TableViewFragment;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
@@ -60,7 +59,7 @@ public class ReportCardAdapter extends RecyclerView.Adapter<ReportCardAdapter.Vi
         return reports.size();
     }
 
-    public void fetchReports(int currentLimit,int numberReportsRequest) {
+    public void fetchReports(int currentLimit, int numberReportsRequest) {
         ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
         query.include(Report.TYPE_OF_CRIME_KEY);
         query.setLimit(currentLimit);

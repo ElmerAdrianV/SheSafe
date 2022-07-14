@@ -116,7 +116,7 @@ public class EmergencyContactsCardAdapter extends RecyclerView.Adapter<Emergency
         }
 
         private void makeACall(Context context) {
-            context.startActivity(new Intent(Intent.ACTION_DIAL)
+            context.startActivity(new Intent(Intent.ACTION_CALL)
                     .setData(Uri.parse("tel:" + tvPhoneNumber.getText())));
         }
     }

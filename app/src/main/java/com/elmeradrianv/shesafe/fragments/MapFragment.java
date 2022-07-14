@@ -172,11 +172,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private ParsePolygon getActualGridSquare() {
         HashMap<Integer,  ArrayList<ParseGeoPoint>> grid= new HashMap<>();
-
         double squareSize = 0.0025;
+        int numSquareSizeGrid=3;
         double cornerLatitudeCC = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
         double cornerLongitudeCC = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
-        LatLng[][] gridCorners = new LatLng[4][4];
+        //saving the number of points in the grid
+        LatLng[][] gridCorners = new LatLng[numSquareSizeGrid+1][numSquareSizeGrid+1];
         for (int i = 0; i < gridCorners.length; i++) {
             for (int j = 0; j < gridCorners[0].length; j++) {
                 gridCorners[i][j] = new LatLng(
@@ -188,9 +189,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         for(int k=0; k<9;k++){
             grid.put(k,new ArrayList<>());
             PolygonOptions polygonOptions = new PolygonOptions();
-            for(int i=k%3; i<k%3+2;i++){
-                if(i-k%3==0) {
-                    for (int j = k / 3; j < k / 3 + 2; j++) {
+            for(int i=k%numSquareSizeGrid; i<k%numSquareSizeGrid+2;i++){
+                //Saving the corners of each square
+                if(i-k%numSquareSizeGrid==0) {
+
+                    for (int j = k / numSquareSizeGrid; j < k / numSquareSizeGrid + 2; j++) {
                         grid.get(k).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
@@ -198,7 +201,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         polygonOptions.add(gridCorners[i][j]);
                     }
                 }else{
-                    for (int j = k / 3+1; j >= k / 3 ; j--) {
+                    for (int j = k /numSquareSizeGrid +1; j >= k / numSquareSizeGrid ; j--) {
                         grid.get(k).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
@@ -207,7 +210,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     }
                 }
             }
-            polygonOptions.add(gridCorners[k%3][k/3]);
+            polygonOptions.add(gridCorners[k%numSquareSizeGrid][k/numSquareSizeGrid]);
             Polygon polygon = map.addPolygon(polygonOptions);
         }
 

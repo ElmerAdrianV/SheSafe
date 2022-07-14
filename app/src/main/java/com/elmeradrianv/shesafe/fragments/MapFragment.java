@@ -67,7 +67,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private final static String KEY_LOCATION = "location";
     private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
-    Location currentLocation;
+    private Location currentLocation;
+    private HashMap<Integer, ParsePolygon> polygonGrid;
+    private HashMap<Integer, ArrayList<Report>> reportsInGrid;
+    private HashMap<Integer, ArrayList<Marker>> markersInGrid;
     private GoogleMap map;
     private LocationRequest locationRequest;
 
@@ -119,9 +122,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         getMyLocation();
-        queryReports();
         startLocationUpdates();
         map.setOnMapLongClickListener(this);
+    }
+
+    private void queryFirstReports() {
+        polygonGrid = getActualGridSquare();
+        reportsInGrid = new HashMap<>();
+        markersInGrid = new HashMap<>();
+        for (Integer k : polygonGrid.keySet()) {
+            ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
+            query.include(Report.TYPE_OF_CRIME_KEY);
+            query.whereWithinPolygon("location", polygonGrid.get(k));
+            query.addDescendingOrder("date");
+            query.findInBackground((reportList, e) -> {
+                if (e != null) {
+                    Log.e(TAG, "Issue with getting reports", e);
+                    return;
+                }
+                reportsInGrid.put(k, new ArrayList<>());
+                reportsInGrid.get(k).addAll(reportList);
+                showReports(k,reportsInGrid.get(k));
+            });
+        }
+    }
+    private void  showReports(Integer keySquare, List<Report> reports) {
+        markersInGrid.put(keySquare,new ArrayList<>());
+        for (Report report : reports) {
+            Marker marker = showMarker(report.getTypeOfCrime().getTag(),
+                    report.getLocation().getLatitude(),
+                    report.getLocation().getLongitude(),
+                    report.getTypeOfCrime().getLevelOfRisk());
+            markersInGrid.get(keySquare).add(marker);
+        }
     }
 
     @SuppressWarnings({"MissingPermission"})
@@ -153,16 +186,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
         double longitudePFL = location.getLongitude() - currentLocation.getLongitude();
         double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
-
         currentLocation = location;
         LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
-//        ParsePolygon actualSquare = getActualSquare(speedVector);
         LatLng actualLocation = new LatLng(
                 currentLocation.getLatitude(),
                 currentLocation.getLongitude());
-        ParsePolygon centerSquare = getActualGridSquare();
-
-        //showMarker("", predictedFutureLocation.latitude, predictedFutureLocation.longitude, 2);
     }
 
     private double positiveRemainder(double divisor, double dividend) {
@@ -170,30 +198,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return dividend - divisor * quotient;
     }
 
-    private ParsePolygon getActualGridSquare() {
-        HashMap<Integer,  ArrayList<ParseGeoPoint>> grid= new HashMap<>();
+    private HashMap<Integer, ParsePolygon> getActualGridSquare() {
+        HashMap<Integer, ArrayList<ParseGeoPoint>> grid = new HashMap<>();
         //squareSize is a "debug number and it will change depends of the speedVector"
-        double squareSize = 0.0025;
-        int numSquareSizeGrid=3;
+        double squareSize = 0.005;
+        int numSquareSizeGrid = 3;
         double cornerLatitudeCC = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
         double cornerLongitudeCC = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
         //saving the number of points in the grid
-        LatLng[][] gridCorners = new LatLng[numSquareSizeGrid+1][numSquareSizeGrid+1];
+        LatLng[][] gridCorners = new LatLng[numSquareSizeGrid + 1][numSquareSizeGrid + 1];
         for (int i = 0; i < gridCorners.length; i++) {
             for (int j = 0; j < gridCorners[0].length; j++) {
                 gridCorners[i][j] = new LatLng(
-                        cornerLatitudeCC-(1-i)*squareSize,
-                        cornerLongitudeCC-(1-j)*squareSize
+                        cornerLatitudeCC - (1 - i) * squareSize,
+                        cornerLongitudeCC - (1 - j) * squareSize
                 );
             }
         }
         //k is nine because the grid has 9 squares
-        for(int k=0; k<9;k++){
-            grid.put(k,new ArrayList<>());
+        for (int k = 0; k < 9; k++) {
+            grid.put(k, new ArrayList<>());
             PolygonOptions polygonOptions = new PolygonOptions();
-            for(int i=k%numSquareSizeGrid; i<k%numSquareSizeGrid+2;i++){
+            for (int i = k % numSquareSizeGrid; i < k % numSquareSizeGrid + 2; i++) {
                 //Saving the corners of each square
-                if(i-k%numSquareSizeGrid==0) {
+                if (i - k % numSquareSizeGrid == 0) {
 
                     for (int j = k / numSquareSizeGrid; j < k / numSquareSizeGrid + 2; j++) {
                         grid.get(k).add(new ParseGeoPoint(
@@ -202,8 +230,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         );
                         polygonOptions.add(gridCorners[i][j]);
                     }
-                }else{
-                    for (int j = k /numSquareSizeGrid +1; j >= k / numSquareSizeGrid ; j--) {
+                } else {
+                    for (int j = k / numSquareSizeGrid + 1; j >= k / numSquareSizeGrid; j--) {
                         grid.get(k).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
@@ -212,12 +240,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     }
                 }
             }
-            polygonOptions.add(gridCorners[k%numSquareSizeGrid][k/numSquareSizeGrid]);
+            polygonOptions.add(gridCorners[k % numSquareSizeGrid][k / numSquareSizeGrid]);
             Polygon polygon = map.addPolygon(polygonOptions);
         }
+        return getGridPolygons(grid);
+    }
 
-        return new ParsePolygon(grid.get(1));
-
+    private HashMap<Integer, ParsePolygon> getGridPolygons(HashMap<Integer, ArrayList<ParseGeoPoint>> grid) {
+        HashMap<Integer, ParsePolygon> gridPolygons = new HashMap<>();
+        for (int k = 0; k < 9; k++) {
+            gridPolygons.put(k,
+                    new ParsePolygon(
+                            grid.get(k)
+                    ));
+        }
+        return gridPolygons;
     }
 
     private void displayLocation() {
@@ -225,7 +262,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
             map.animateCamera(cameraUpdate);
-            queryReports();
+            queryFirstReports();
         }
     }
 
@@ -242,27 +279,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 return;
             }
             reports.addAll(reportList);
-            showReports(reports);
+            //showReports(reports);
         });
         return reports;
     }
 
-    private void showReports(List<Report> reports) {
-        for (Report report : reports) {
-            showMarker(report.getTypeOfCrime().getTag(),
-                    report.getLocation().getLatitude(),
-                    report.getLocation().getLongitude(),
-                    report.getTypeOfCrime().getLevelOfRisk());
-        }
-    }
 
-    private void showMarker(String title, double latitude, double longitude, int levelOfRisk) {
+
+    private Marker showMarker(String title, double latitude, double longitude, int levelOfRisk) {
         LatLng reportLatLng = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(reportLatLng)
                 .title(title).icon(PinAnimation.getNewIconWithLevelOfRisk(levelOfRisk));
         Marker marker = map.addMarker(markerOptions);
         PinAnimation.dropPinEffect(marker);
+        return marker;
     }
 
     @Override
@@ -305,7 +336,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             Date dateObject;
             String dob_var = (etDate.getText().toString());
             dateObject = formatter.parse(dob_var);
-            String date = new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
+            new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
             saveReportInDataBase(etDescription.getText().toString(), dateObject, new ParseGeoPoint(latLng.latitude, latLng.longitude), crime);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -357,7 +388,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void setupEditDate(View messageView) {
-
         messageView.findViewById(R.id.sTypeOfCrime);
         EditText etDate = messageView.findViewById(R.id.etDate);
         DatePickerDialog.OnDateSetListener onDateSetListener = (view, year, month, dayOfMonth) -> {

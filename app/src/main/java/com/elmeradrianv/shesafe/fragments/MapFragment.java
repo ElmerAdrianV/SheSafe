@@ -172,6 +172,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private ParsePolygon getActualGridSquare() {
         HashMap<Integer,  ArrayList<ParseGeoPoint>> grid= new HashMap<>();
+        //squareSize is a "debug number and it will change depends of the speedVector"
         double squareSize = 0.0025;
         int numSquareSizeGrid=3;
         double cornerLatitudeCC = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
@@ -186,6 +187,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 );
             }
         }
+        //k is nine because the grid has 9 squares
         for(int k=0; k<9;k++){
             grid.put(k,new ArrayList<>());
             PolygonOptions polygonOptions = new PolygonOptions();

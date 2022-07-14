@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,12 @@ import com.elmeradrianv.shesafe.auxiliar.PinAnimation;
 import com.elmeradrianv.shesafe.database.Report;
 import com.elmeradrianv.shesafe.database.TypeOfCrime;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,7 +43,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.parse.ParseGeoPoint;
+import com.parse.ParsePolygon;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -55,8 +65,11 @@ import permissions.dispatcher.NeedsPermission;
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
+    private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
+    private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     Location currentLocation;
     private GoogleMap map;
+    private LocationRequest locationRequest;
 
 
     public MapFragment() {
@@ -107,12 +120,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         getMyLocation();
         queryReports();
+        startLocationUpdates();
         map.setOnMapLongClickListener(this);
     }
 
     @SuppressWarnings({"MissingPermission"})
     @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
-    void getMyLocation() {
+    private void getMyLocation() {
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
 
@@ -120,7 +134,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         locationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
+                        //firstDisplayLocation;
+                        currentLocation = location;
                         onLocationChanged(location);
+                        displayLocation();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -134,8 +151,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (location == null) {
             return;
         }
+        double longitudePFL = location.getLongitude() - currentLocation.getLongitude();
+        double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
+
         currentLocation = location;
-        displayLocation();
+        LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
+//        ParsePolygon actualSquare = getActualSquare(speedVector);
+        LatLng actualLocation = new LatLng(
+                currentLocation.getLatitude(),
+                currentLocation.getLongitude());
+        ParsePolygon centerSquare = getActualGridSquare();
+
+        //showMarker("", predictedFutureLocation.latitude, predictedFutureLocation.longitude, 2);
+    }
+
+    private double positiveRemainder(double divisor, double dividend) {
+        double quotient = Math.floor(dividend / divisor);
+        return dividend - divisor * quotient;
+    }
+
+    private ParsePolygon getActualGridSquare() {
+        HashMap<Integer,  ArrayList<ParseGeoPoint>> grid= new HashMap<>();
+
+        double squareSize = 0.0025;
+        double cornerLatitudeCC = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
+        double cornerLongitudeCC = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
+        LatLng[][] gridCorners = new LatLng[4][4];
+        for (int i = 0; i < gridCorners.length; i++) {
+            for (int j = 0; j < gridCorners[0].length; j++) {
+                gridCorners[i][j] = new LatLng(
+                        cornerLatitudeCC-(1-i)*squareSize,
+                        cornerLongitudeCC-(1-j)*squareSize
+                );
+            }
+        }
+        for(int k=0; k<9;k++){
+            grid.put(k,new ArrayList<>());
+            PolygonOptions polygonOptions = new PolygonOptions();
+            for(int i=k%3; i<k%3+2;i++){
+                if(i-k%3==0) {
+                    for (int j = k / 3; j < k / 3 + 2; j++) {
+                        grid.get(k).add(new ParseGeoPoint(
+                                gridCorners[i][j].latitude,
+                                gridCorners[i][j].longitude)
+                        );
+                        polygonOptions.add(gridCorners[i][j]);
+                    }
+                }else{
+                    for (int j = k / 3+1; j >= k / 3 ; j--) {
+                        grid.get(k).add(new ParseGeoPoint(
+                                gridCorners[i][j].latitude,
+                                gridCorners[i][j].longitude)
+                        );
+                        polygonOptions.add(gridCorners[i][j]);
+                    }
+                }
+            }
+            polygonOptions.add(gridCorners[k%3][k/3]);
+            Polygon polygon = map.addPolygon(polygonOptions);
+        }
+
+        return new ParsePolygon(grid.get(1));
+
     }
 
     private void displayLocation() {
@@ -143,6 +220,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
             map.animateCamera(cameraUpdate);
+            queryReports();
         }
     }
 
@@ -298,4 +376,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             datePickerDialog.show();
         });
     }
+
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    protected void startLocationUpdates() {
+        locationRequest = new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        locationRequest.setInterval(UPDATE_INTERVAL);
+        locationRequest.setFastestInterval(FASTEST_INTERVAL);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(locationRequest);
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+        SettingsClient settingsClient = LocationServices.getSettingsClient(getContext());
+        settingsClient.checkLocationSettings(locationSettingsRequest);
+        //noinspection MissingPermission
+        getFusedLocationProviderClient(getContext()).requestLocationUpdates(locationRequest, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        onLocationChanged(locationResult.getLastLocation());
+                    }
+                },
+                Looper.myLooper());
+    }
+
 }

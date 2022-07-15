@@ -67,6 +67,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private final static String KEY_LOCATION = "location";
     private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
+    public static final int SQUARE_GRID_LENGTH = 3;
+    private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH*SQUARE_GRID_LENGTH;
+
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
     private HashMap<Integer, ArrayList<Report>> reportsInGrid;
@@ -130,19 +133,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         polygonGrid = getActualGridSquare();
         reportsInGrid = new HashMap<>();
         markersInGrid = new HashMap<>();
-        for (Integer k : polygonGrid.keySet()) {
+        for (Integer keySquare : polygonGrid.keySet()) {
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
-            query.whereWithinPolygon("location", polygonGrid.get(k));
+            query.whereWithinPolygon("location", polygonGrid.get(keySquare));
             query.addDescendingOrder("date");
             query.findInBackground((reportList, e) -> {
                 if (e != null) {
                     Log.e(TAG, "Issue with getting reports", e);
                     return;
                 }
-                reportsInGrid.put(k, new ArrayList<>());
-                reportsInGrid.get(k).addAll(reportList);
-                showReports(k,reportsInGrid.get(k));
+                reportsInGrid.put(keySquare, new ArrayList<>());
+                reportsInGrid.get(keySquare).addAll(reportList);
+                showReports(keySquare,reportsInGrid.get(keySquare));
             });
         }
     }
@@ -202,37 +205,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         HashMap<Integer, ArrayList<ParseGeoPoint>> grid = new HashMap<>();
         //squareSize is a "debug number and it will change depends of the speedVector"
         double squareSize = 0.005;
-        int numSquareSizeGrid = 3;
-        double cornerLatitudeCC = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
-        double cornerLongitudeCC = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
+        // abbr. CS means central square
+        double cornerLatitudeCS = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
+        double cornerLongitudeCS = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
         //saving the number of points in the grid
-        LatLng[][] gridCorners = new LatLng[numSquareSizeGrid + 1][numSquareSizeGrid + 1];
+        LatLng[][] gridCorners = new LatLng[SQUARE_GRID_LENGTH + 1][SQUARE_GRID_LENGTH + 1];
         for (int i = 0; i < gridCorners.length; i++) {
             for (int j = 0; j < gridCorners[0].length; j++) {
                 gridCorners[i][j] = new LatLng(
-                        cornerLatitudeCC - (1 - i) * squareSize,
-                        cornerLongitudeCC - (1 - j) * squareSize
+                        cornerLatitudeCS - (1 - i) * squareSize,
+                        cornerLongitudeCS - (1 - j) * squareSize
                 );
             }
         }
-        //k is nine because the grid has 9 squares
-        for (int k = 0; k < 9; k++) {
-            grid.put(k, new ArrayList<>());
+        for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
+            grid.put(keySquare, new ArrayList<>());
             PolygonOptions polygonOptions = new PolygonOptions();
-            for (int i = k % numSquareSizeGrid; i < k % numSquareSizeGrid + 2; i++) {
+            int gridCornerStartColumn = keySquare % SQUARE_GRID_LENGTH;
+            int gridCornerStartRow = keySquare / SQUARE_GRID_LENGTH;
+            for (int i = gridCornerStartColumn; i < gridCornerStartColumn + 2; i++) {
                 //Saving the corners of each square
-                if (i - k % numSquareSizeGrid == 0) {
-
-                    for (int j = k / numSquareSizeGrid; j < k / numSquareSizeGrid + 2; j++) {
-                        grid.get(k).add(new ParseGeoPoint(
+                if (i - gridCornerStartColumn == 0) {
+                    for (int j = gridCornerStartRow; j < gridCornerStartRow + 2; j++) {
+                        grid.get(keySquare).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
                         );
                         polygonOptions.add(gridCorners[i][j]);
                     }
                 } else {
-                    for (int j = k / numSquareSizeGrid + 1; j >= k / numSquareSizeGrid; j--) {
-                        grid.get(k).add(new ParseGeoPoint(
+                    for (int j = gridCornerStartRow + 1; j >= keySquare / gridCornerStartRow; j--) {
+                        grid.get(keySquare).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
                         );
@@ -240,7 +243,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     }
                 }
             }
-            polygonOptions.add(gridCorners[k % numSquareSizeGrid][k / numSquareSizeGrid]);
+            polygonOptions.add(gridCorners[gridCornerStartColumn][gridCornerStartRow]);
             Polygon polygon = map.addPolygon(polygonOptions);
         }
         return getGridPolygons(grid);

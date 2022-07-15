@@ -336,7 +336,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             Date dateObject;
             String dob_var = (etDate.getText().toString());
             dateObject = formatter.parse(dob_var);
-            new SimpleDateFormat("dd/MM/yyyy").format(dateObject);
             saveReportInDataBase(etDescription.getText().toString(), dateObject, new ParseGeoPoint(latLng.latitude, latLng.longitude), crime);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -400,7 +399,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         String stringDate = date.format(formatter);
         etDate.setText(stringDate);
         DatePickerDialog datePickerDialog = new DatePickerDialog(MapFragment.this.getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                onDateSetListener, date.getYear(), date.getMonthValue() + 1, date.getDayOfMonth());
+                onDateSetListener, date.getYear(), date.getMonthValue() -1, date.getDayOfMonth());
         datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         etDate.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {

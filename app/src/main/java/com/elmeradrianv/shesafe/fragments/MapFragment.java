@@ -66,12 +66,18 @@ import permissions.dispatcher.NeedsPermission;
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
-    private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
+    private static final int UPDATE_INTERVAL = 20000; //In milliseconds, 20s
+    private static final int UPDATE_INTERVAL_SECONDS = 20; //In milliseconds, 20s
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     private static final int SQUARE_GRID_LENGTH = 3;
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
     private static final int SQUARE_CENTER_CENTER = 4;
     private static final int OUTSIDE_GRID = -1;
+    private static final double SQUARE_SIZE_WALK = 0.005;
+    private static final double SQUARE_SIZE_BIKE = 0.015;
+    private static final double SQUARE_SIZE_CAR = 0.045;
+    private static final double LAT_TO_KM=110.574;
+    private static final double LNG_TO_KM=111.320;
 
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
@@ -136,7 +142,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void queryFirstReports() {
-        polygonGrid = getActualGridSquare();
+        polygonGrid = getActualGridSquare(SQUARE_SIZE_WALK);
         for (Integer keySquare : polygonGrid.keySet()) {
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
@@ -197,14 +203,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
         LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
+        double speedInKilometers = determinateSpeed(speedVector);
+        double squareSize=determinateSizeBySpeed(speedInKilometers);
         ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
         int gridPosition = getGridPosition(actualLocation);
         if (gridPosition != SQUARE_CENTER_CENTER) {
-            recenterGrid(gridPosition);
+            recenterGrid(gridPosition,squareSize);
         }
     }
 
-    private void recenterGrid(int newGridPosition) {
+    private double determinateSpeed(LatLng speedVector) {
+        double distance = Math.sqrt(
+                Math.pow(latitudeToKilometer(speedVector.latitude),2)
+                +
+                Math.pow(longitudeToKilometer(speedVector.latitude),2)
+        );
+        return distance/UPDATE_INTERVAL_SECONDS;
+    }
+
+    private double longitudeToKilometer(double latitude) {
+        return LNG_TO_KM*Math.cos(latitude);
+    }
+
+    private double latitudeToKilometer(double latitude) {
+        return latitude*LAT_TO_KM;
+    }
+
+    private double determinateSizeBySpeed(double speed) {
+        if(speed<5){
+            return SQUARE_SIZE_WALK;
+        }
+        if(speed<15){
+            return SQUARE_SIZE_BIKE;
+        }
+        else{
+            return SQUARE_SIZE_CAR;
+        }
+    }
+
+    private void recenterGrid(int newGridPosition, double squareSize) {
         if (newGridPosition == OUTSIDE_GRID) {
             removeMarkersFromGrid(markersInGrid);
             removeReportsFromWholeGrid();
@@ -224,7 +261,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 pushGridHorizontal(rowDisplacement, removeMarkers);
             }
             removeMarkersFromGrid(removeMarkers);
-            polygonGrid = getActualGridSquare();
+            polygonGrid = getActualGridSquare(squareSize);
             requeryReports(columnDisplacement, rowDisplacement);
         }
     }
@@ -325,10 +362,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return dividend - divisor * quotient;
     }
 
-    private HashMap<Integer, ParsePolygon> getActualGridSquare() {
+    private HashMap<Integer, ParsePolygon> getActualGridSquare(double squareSize) {
         HashMap<Integer, ArrayList<ParseGeoPoint>> grid = new HashMap<>();
-        //squareSize is a "debug number and it will change depends of the speedVector"
-        double squareSize = 0.01;
         // abbr. CS means central square
         double cornerLatitudeCS = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
         double cornerLongitudeCS = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());

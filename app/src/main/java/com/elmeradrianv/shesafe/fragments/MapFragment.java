@@ -70,15 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     private static final int SQUARE_GRID_LENGTH = 3;
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
-    private static final int SQUARE_BOTTOM_LEFT = 0;
-    private static final int SQUARE_BOTTOM_CENTER = 1;
-    private static final int SQUARE_BOTTOM_RIGHT = 2;
-    private static final int SQUARE_CENTER_LEFT = 3;
     private static final int SQUARE_CENTER_CENTER = 4;
-    private static final int SQUARE_CENTER_RIGHT = 5;
-    private static final int SQUARE_UP_LEFT = 6;
-    private static final int SQUARE_UP_CENTER = 7;
-    private static final int SQUARE_UP_RIGHT = 8;
     private static final int OUTSIDE_GRID = -1;
 
     private Location currentLocation;
@@ -399,24 +391,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             map.animateCamera(cameraUpdate);
         }
     }
-
-
-    private List<Report> queryReports() {
-        List<Report> reports = new ArrayList<>();
-        ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
-        query.include(Report.TYPE_OF_CRIME_KEY);
-        query.addDescendingOrder("createdAt");
-        query.findInBackground((reportList, e) -> {
-            if (e != null) {
-                Log.e(TAG, "Issue with getting reports", e);
-                return;
-            }
-            reports.addAll(reportList);
-            //showReports(reports);
-        });
-        return reports;
-    }
-
 
     private Marker showMarker(String title, double latitude, double longitude, int levelOfRisk) {
         LatLng reportLatLng = new LatLng(latitude, longitude);

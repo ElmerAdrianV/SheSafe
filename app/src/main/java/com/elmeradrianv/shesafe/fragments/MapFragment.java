@@ -295,7 +295,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (rowDisplacement != 0) {
             int centerRow = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
             int horizontalGap = centerRow - rowDisplacement;
-            int horizontalStart = horizontalGap - horizontalGap % SQUARE_GRID_LENGTH;
+            int horizontalStart = 3*horizontalGap - 3*horizontalGap % SQUARE_GRID_LENGTH;
             for (int i = horizontalStart; i < horizontalStart + SQUARE_GRID_LENGTH; i++) {
                 squareKeys.add(i);
             }
@@ -405,7 +405,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         List<Report> reports = new ArrayList<>();
         ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
         query.include(Report.TYPE_OF_CRIME_KEY);
-        query.setLimit(50);
         query.addDescendingOrder("createdAt");
         query.findInBackground((reportList, e) -> {
             if (e != null) {

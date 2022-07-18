@@ -404,7 +404,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        Toast.makeText(getContext(), "Detected", Toast.LENGTH_SHORT).show();
         showAlertDialogForPoint(latLng);
     }
 

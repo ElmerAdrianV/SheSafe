@@ -222,14 +222,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             int newCenterGridPositionColumn = newGridPosition / SQUARE_GRID_LENGTH;
             int centerGridPositionRow = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;
             int centerGridPositionColumn = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
-            int columnDisplacement = centerGridPositionColumn - newCenterGridPositionColumn;
-            int rowDisplacement = centerGridPositionRow - newCenterGridPositionRow;
+            int columnDisplacement = newCenterGridPositionColumn - centerGridPositionColumn;
+            int rowDisplacement = newCenterGridPositionRow - centerGridPositionRow;
             HashMap<Integer, ArrayList<Marker>> removeMarkers = new HashMap<>();
             if (columnDisplacement != 0) {
-                pushGridHorizontal(columnDisplacement, removeMarkers);
+                pushGridVertical(columnDisplacement, removeMarkers);
             }
             if (rowDisplacement != 0) {
-                pushGridVertical(rowDisplacement, removeMarkers);
+                pushGridHorizontal(rowDisplacement, removeMarkers);
             }
             removeMarkersFromGrid(removeMarkers);
             polygonGrid = getActualGridSquare();

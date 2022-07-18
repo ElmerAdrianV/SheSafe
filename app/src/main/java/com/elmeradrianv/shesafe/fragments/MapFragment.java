@@ -58,6 +58,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import permissions.dispatcher.NeedsPermission;
@@ -67,8 +68,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private final static String KEY_LOCATION = "location";
     private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
-    public static final int SQUARE_GRID_LENGTH = 3;
-    private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH*SQUARE_GRID_LENGTH;
+    private static final int SQUARE_GRID_LENGTH = 3;
+    private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
+    private static final int SQUARE_BOTTOM_LEFT = 0;
+    private static final int SQUARE_BOTTOM_CENTER = 1;
+    private static final int SQUARE_BOTTOM_RIGHT = 2;
+    private static final int SQUARE_CENTER_LEFT = 3;
+    private static final int SQUARE_CENTER_CENTER = 4;
+    private static final int SQUARE_CENTER_RIGHT = 5;
+    private static final int SQUARE_UP_LEFT = 6;
+    private static final int SQUARE_UP_CENTER = 7;
+    private static final int SQUARE_UP_RIGHT = 8;
+    private static final int OUTSIDE_GRID = -1;
 
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
@@ -124,15 +135,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        reportsInGrid = new HashMap<>();
+        markersInGrid = new HashMap<>();
         getMyLocation();
         startLocationUpdates();
+
         map.setOnMapLongClickListener(this);
     }
 
     private void queryFirstReports() {
         polygonGrid = getActualGridSquare();
-        reportsInGrid = new HashMap<>();
-        markersInGrid = new HashMap<>();
         for (Integer keySquare : polygonGrid.keySet()) {
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
@@ -145,12 +157,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 }
                 reportsInGrid.put(keySquare, new ArrayList<>());
                 reportsInGrid.get(keySquare).addAll(reportList);
-                showReports(keySquare,reportsInGrid.get(keySquare));
+                showReports(keySquare, reportsInGrid.get(keySquare));
             });
         }
     }
-    private void  showReports(Integer keySquare, List<Report> reports) {
-        markersInGrid.put(keySquare,new ArrayList<>());
+
+    private void showReports(Integer keySquare, List<Report> reports) {
+        markersInGrid.put(keySquare, new ArrayList<>());
         for (Report report : reports) {
             Marker marker = showMarker(report.getTypeOfCrime().getTag(),
                     report.getLocation().getLatitude(),
@@ -172,6 +185,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     if (location != null) {
                         //firstDisplayLocation;
                         currentLocation = location;
+                        queryFirstReports();
                         onLocationChanged(location);
                         displayLocation();
                     }
@@ -191,10 +205,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
         LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
-        LatLng actualLocation = new LatLng(
-                currentLocation.getLatitude(),
-                currentLocation.getLongitude());
+        ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+        int gridPosition = getGridPosition(actualLocation);
+        if (gridPosition != SQUARE_CENTER_CENTER) {
+            recenterGrid(gridPosition);
+        }
     }
+
+    private void recenterGrid(int newGridPosition) {
+        if (newGridPosition == OUTSIDE_GRID) {
+            removeMarkersFromGrid(markersInGrid);
+            removeReportsFromWholeGrid();
+            queryFirstReports();
+        } else {
+            int newCenterGridPositionRow = newGridPosition % SQUARE_GRID_LENGTH;
+            int newCenterGridPositionColumn = newGridPosition / SQUARE_GRID_LENGTH;
+            int centerGridPositionRow = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;
+            int centerGridPositionColumn = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
+            int columnDisplacement = centerGridPositionColumn - newCenterGridPositionColumn;
+            int rowDisplacement = centerGridPositionRow - newCenterGridPositionRow;
+            HashMap<Integer, ArrayList<Marker>> removeMarkers = new HashMap<>();
+            pushGridHorizontal(columnDisplacement, removeMarkers);
+            pushGridVertical(rowDisplacement, removeMarkers);
+            removeMarkersFromGrid(removeMarkers);
+            polygonGrid = getActualGridSquare();
+            requeryReports(columnDisplacement, rowDisplacement);
+        }
+    }
+
+    private int getGridPosition(ParseGeoPoint actualLocation) {
+        for (int keySquare : polygonGrid.keySet()) {
+            if (polygonGrid.get(keySquare).containsPoint(actualLocation)) {
+                return keySquare;
+            }
+        }
+        return OUTSIDE_GRID;
+    }
+
+    private void pushGridHorizontal(int columnDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+        for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
+            int oldGridRow = keySquare / SQUARE_GRID_LENGTH;
+            int newKeySquarePosition = keySquare + columnDisplacement;
+            int newGridRow = newKeySquarePosition / SQUARE_GRID_LENGTH;
+            if (newGridRow == oldGridRow) {
+                polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
+                markersInGrid.replace(newKeySquarePosition, markersInGrid.get(keySquare));
+                reportsInGrid.replace(newKeySquarePosition, reportsInGrid.get(keySquare));
+            }
+        }
+    }
+
+    private void pushGridVertical(int rowDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+        for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
+            int newKeySquarePosition = keySquare + SQUARE_GRID_LENGTH * rowDisplacement;
+            if (0 <= newKeySquarePosition && newKeySquarePosition <= 9) {
+                polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
+                markersInGrid.replace(newKeySquarePosition, markersInGrid.get(keySquare));
+                reportsInGrid.replace(newKeySquarePosition, reportsInGrid.get(keySquare));
+            }
+        }
+    }
+
+
 
     private double positiveRemainder(double divisor, double dividend) {
         double quotient = Math.floor(dividend / divisor);
@@ -204,7 +276,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private HashMap<Integer, ParsePolygon> getActualGridSquare() {
         HashMap<Integer, ArrayList<ParseGeoPoint>> grid = new HashMap<>();
         //squareSize is a "debug number and it will change depends of the speedVector"
-        double squareSize = 0.005;
+        double squareSize = 0.01;
         // abbr. CS means central square
         double cornerLatitudeCS = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
         double cornerLongitudeCS = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
@@ -234,7 +306,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         polygonOptions.add(gridCorners[i][j]);
                     }
                 } else {
-                    for (int j = gridCornerStartRow + 1; j >= keySquare / gridCornerStartRow; j--) {
+                    for (int j = gridCornerStartRow + 1; j >= gridCornerStartRow; j--) {
                         grid.get(keySquare).add(new ParseGeoPoint(
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
@@ -251,7 +323,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private HashMap<Integer, ParsePolygon> getGridPolygons(HashMap<Integer, ArrayList<ParseGeoPoint>> grid) {
         HashMap<Integer, ParsePolygon> gridPolygons = new HashMap<>();
-        for (int k = 0; k < 9; k++) {
+        for (int k = 0; k < SQUARE_GRID_3X3_COUNT; k++) {
             gridPolygons.put(k,
                     new ParsePolygon(
                             grid.get(k)
@@ -265,7 +337,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
             map.animateCamera(cameraUpdate);
-            queryFirstReports();
         }
     }
 
@@ -286,7 +357,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
         return reports;
     }
-
 
 
     private Marker showMarker(String title, double latitude, double longitude, int levelOfRisk) {
@@ -402,7 +472,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         String stringDate = date.format(formatter);
         etDate.setText(stringDate);
         DatePickerDialog datePickerDialog = new DatePickerDialog(MapFragment.this.getContext(), android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                onDateSetListener, date.getYear(), date.getMonthValue() -1, date.getDayOfMonth());
+                onDateSetListener, date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
         datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         etDate.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {

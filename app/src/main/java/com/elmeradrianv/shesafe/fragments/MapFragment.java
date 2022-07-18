@@ -225,10 +225,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             int columnDisplacement = centerGridPositionColumn - newCenterGridPositionColumn;
             int rowDisplacement = centerGridPositionRow - newCenterGridPositionRow;
             HashMap<Integer, ArrayList<Marker>> removeMarkers = new HashMap<>();
-            if(columnDisplacement!=0) {
+            if (columnDisplacement != 0) {
                 pushGridHorizontal(columnDisplacement, removeMarkers);
             }
-            if(rowDisplacement!=0) {
+            if (rowDisplacement != 0) {
                 pushGridVertical(rowDisplacement, removeMarkers);
             }
             removeMarkersFromGrid(removeMarkers);
@@ -295,7 +295,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (rowDisplacement != 0) {
             int centerRow = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
             int horizontalGap = centerRow - rowDisplacement;
-            int horizontalStart = 3*horizontalGap - 3*horizontalGap % SQUARE_GRID_LENGTH;
+            int horizontalStart = 3 * horizontalGap - 3 * horizontalGap % SQUARE_GRID_LENGTH;
             for (int i = horizontalStart; i < horizontalStart + SQUARE_GRID_LENGTH; i++) {
                 squareKeys.add(i);
             }

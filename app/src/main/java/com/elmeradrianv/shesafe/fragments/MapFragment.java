@@ -284,17 +284,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private HashSet<Integer> obtainSquareKeysToQuery(int columnDisplacement, int rowDisplacement) {
         HashSet<Integer> squareKeys = new HashSet<>();
-        if (rowDisplacement != 0) {
+        if (columnDisplacement != 0) {
             int centerRow = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
-            int horizontalGap = centerRow - rowDisplacement;
+            int horizontalGap = centerRow + columnDisplacement;
             int horizontalStart = 3 * horizontalGap - 3 * horizontalGap % SQUARE_GRID_LENGTH;
             for (int i = horizontalStart; i < horizontalStart + SQUARE_GRID_LENGTH; i++) {
                 squareKeys.add(i);
             }
         }
-        if (columnDisplacement != 0) {
+        if (rowDisplacement != 0) {
             int centerColumn = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;
-            int verticalGap = centerColumn - columnDisplacement;
+            int verticalGap = centerColumn + rowDisplacement;
             verticalGap -= verticalGap / SQUARE_GRID_LENGTH;
             int verticalStart = verticalGap - verticalGap / SQUARE_GRID_LENGTH;
             for (int i = verticalStart; i < verticalStart + 3 * SQUARE_GRID_LENGTH; i += 3) {

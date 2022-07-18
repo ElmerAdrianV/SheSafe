@@ -238,12 +238,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return OUTSIDE_GRID;
     }
 
-    private void pushGridHorizontal(int columnDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+    private void pushGridHorizontal(int rowDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
         for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
             int oldGridRow = keySquare / SQUARE_GRID_LENGTH;
-            int newKeySquarePosition = keySquare + columnDisplacement;
+            int newKeySquarePosition = keySquare - rowDisplacement;
             int newGridRow = newKeySquarePosition / SQUARE_GRID_LENGTH;
-            if (newGridRow == oldGridRow) {
+            if (newGridRow == oldGridRow && 0 <= newKeySquarePosition && newKeySquarePosition <= 9) {
                 polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
                 markersInGrid.replace(newKeySquarePosition, markersInGrid.get(keySquare));
                 reportsInGrid.replace(newKeySquarePosition, reportsInGrid.get(keySquare));
@@ -251,9 +251,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void pushGridVertical(int rowDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+    private void pushGridVertical(int columnDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
         for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
-            int newKeySquarePosition = keySquare + SQUARE_GRID_LENGTH * rowDisplacement;
+            int newKeySquarePosition = keySquare - SQUARE_GRID_LENGTH * columnDisplacement;
             if (0 <= newKeySquarePosition && newKeySquarePosition <= 9) {
                 polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
                 markersInGrid.replace(newKeySquarePosition, markersInGrid.get(keySquare));

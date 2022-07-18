@@ -225,8 +225,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             int columnDisplacement = centerGridPositionColumn - newCenterGridPositionColumn;
             int rowDisplacement = centerGridPositionRow - newCenterGridPositionRow;
             HashMap<Integer, ArrayList<Marker>> removeMarkers = new HashMap<>();
-            pushGridHorizontal(columnDisplacement, removeMarkers);
-            pushGridVertical(rowDisplacement, removeMarkers);
+            if(columnDisplacement!=0) {
+                pushGridHorizontal(columnDisplacement, removeMarkers);
+            }
+            if(rowDisplacement!=0) {
+                pushGridVertical(rowDisplacement, removeMarkers);
+            }
             removeMarkersFromGrid(removeMarkers);
             polygonGrid = getActualGridSquare();
             requeryReports(columnDisplacement, rowDisplacement);
@@ -266,6 +270,62 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
+    private void requeryReports(int columnDisplacement, int rowDisplacement) {
+        HashSet<Integer> squareKeys = obtainSquareKeysToQuery(columnDisplacement, rowDisplacement);
+        for (Integer keySquare : squareKeys) {
+            Log.i(TAG, "requeryReports: " + keySquare);
+            ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
+            query.include(Report.TYPE_OF_CRIME_KEY);
+            query.whereWithinPolygon("location", polygonGrid.get(keySquare));
+            query.addDescendingOrder("date");
+            query.findInBackground((reportList, e) -> {
+                if (e != null) {
+                    Log.e(TAG, "Issue with getting reports", e);
+                    return;
+                }
+                reportsInGrid.put(keySquare, new ArrayList<>());
+                reportsInGrid.get(keySquare).addAll(reportList);
+                showReports(keySquare, reportsInGrid.get(keySquare));
+            });
+        }
+    }
+
+    private HashSet<Integer> obtainSquareKeysToQuery(int columnDisplacement, int rowDisplacement) {
+        HashSet<Integer> squareKeys = new HashSet<>();
+        if (rowDisplacement != 0) {
+            int centerRow = SQUARE_CENTER_CENTER / SQUARE_GRID_LENGTH;
+            int horizontalGap = centerRow - rowDisplacement;
+            int horizontalStart = horizontalGap - horizontalGap % SQUARE_GRID_LENGTH;
+            for (int i = horizontalStart; i < horizontalStart + SQUARE_GRID_LENGTH; i++) {
+                squareKeys.add(i);
+            }
+        }
+        if (columnDisplacement != 0) {
+            int centerColumn = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;
+            int verticalGap = centerColumn - columnDisplacement;
+            verticalGap -= verticalGap / SQUARE_GRID_LENGTH;
+            int verticalStart = verticalGap - verticalGap / SQUARE_GRID_LENGTH;
+            for (int i = verticalStart; i < verticalStart + 3 * SQUARE_GRID_LENGTH; i += 3) {
+                squareKeys.add(i);
+            }
+        }
+
+        return squareKeys;
+    }
+
+    private void removeReportsFromWholeGrid() {
+        for (int keySquare : reportsInGrid.keySet()) {
+            reportsInGrid.get(keySquare).clear();
+        }
+    }
+
+    private void removeMarkersFromGrid(HashMap<Integer, ArrayList<Marker>> markersInGrid) {
+        for (int keySquare : markersInGrid.keySet()) {
+            for (Marker marker : markersInGrid.get(keySquare)) {
+                marker.remove();
+            }
+        }
+    }
 
 
     private double positiveRemainder(double divisor, double dividend) {

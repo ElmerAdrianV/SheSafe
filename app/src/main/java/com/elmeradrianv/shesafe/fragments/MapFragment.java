@@ -67,7 +67,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
     private static final int UPDATE_INTERVAL = 36000; //In milliseconds, 36s
-    private static final double TO_KM_PER_HOUR = 1000;
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     private static final int SQUARE_GRID_LENGTH = 3;
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
@@ -82,9 +81,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final int MOV_BIKE = 1;
     private static final int MOV_CAR = 2;
     private static final double MTS_PER_SECOND_TO_KM_PER_HOUR = 3.6;
-    private static final int ZOOM_WALK=18;
-    private static final int ZOOM_BIKE=17;
-    private static final int ZOOM_CAR=16;
+    private static final int ZOOM_WALK = 18;
+    private static final int ZOOM_BIKE = 17;
+    private static final int ZOOM_CAR = 16;
 
 
     private Location currentLocation;
@@ -214,18 +213,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         int newWayToMove = determinateWayToMove(newSquareSize);
         int zoom = determinateZoomByWayToMove(newWayToMove);
         if (oldWayMov != newWayToMove) {
-            resizeSquare(newSquareSize,zoom);
+            resizeSquare(newSquareSize, zoom);
         } else {
             ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
             int gridPosition = getGridPosition(actualLocation);
             if (gridPosition != SQUARE_CENTER_CENTER) {
-                recenterGrid(gridPosition, newSquareSize,zoom);
+                recenterGrid(gridPosition, newSquareSize, zoom);
             }
         }
     }
 
     private int determinateZoomByWayToMove(int wayToMove) {
-        switch(wayToMove){
+        switch (wayToMove) {
             case MOV_WALK:
                 return ZOOM_WALK;
             case MOV_BIKE:
@@ -255,7 +254,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
 
     private double speedToKmPerHour(double speedInMetersPerSecond) {
-        return speedInMetersPerSecond*MTS_PER_SECOND_TO_KM_PER_HOUR;
+        return speedInMetersPerSecond * MTS_PER_SECOND_TO_KM_PER_HOUR;
     }
 
     private double determinateSizeBySpeed(double speed) {

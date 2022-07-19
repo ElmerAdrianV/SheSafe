@@ -81,8 +81,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final int MOV_WALK = 0;
     private static final int MOV_BIKE = 1;
     private static final int MOV_CAR = 2;
-    private static final double LAT_TO_KM = 110.574;
-    private static final double LNG_TO_KM = 111.320;
+    private static final double MTS_PER_SECOND_TO_KM_PER_HOUR = 3.6;
     private static final int ZOOM_WALK=18;
     private static final int ZOOM_BIKE=17;
     private static final int ZOOM_CAR=16;
@@ -207,13 +206,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (location == null) {
             return;
         }
-        double longitudePFL = location.getLongitude() - currentLocation.getLongitude();
-        double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
-        LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
         double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLongitude() - polygonGrid.get(0).getCoordinates().get(0).getLongitude();
         int oldWayMov = determinateWayToMove(oldSquareSize);
-        double speedInKilometers = determinateSpeed(speedVector);
+        double speedInKilometers = speedToKmPerHour(currentLocation.getSpeed());
+        Log.i(TAG, "onLocationChanged: "+speedInKilometers);
         double newSquareSize = determinateSizeBySpeed(speedInKilometers);
         int newWayToMove = determinateWayToMove(newSquareSize);
         int zoom = determinateZoomByWayToMove(newWayToMove);
@@ -258,30 +255,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
 
-    private double determinateSpeed(LatLng speedVector) {
-        if(Math.abs(speedVector.longitude)>0) {
-            double distance = Math.sqrt(
-                    Math.pow(latitudeToKilometer(speedVector.latitude), 2)
-                            +
-                            Math.pow(longitudeToKilometer(speedVector.latitude), 2)
-            );
-            return distance*TO_KM_PER_HOUR;
-        }
-        if( Math.abs(speedVector.longitude)>0){
-            double distance = Math.sqrt(
-                    Math.pow(latitudeToKilometer(speedVector.latitude), 2)
-            );
-            return distance*TO_KM_PER_HOUR;
-        }
-        return 0;
-    }
-
-    private double longitudeToKilometer(double latitude) {
-        return LNG_TO_KM * Math.cos(latitude);
-    }
-
-    private double latitudeToKilometer(double latitude) {
-        return latitude * LAT_TO_KM;
+    private double speedToKmPerHour(double speedInMetersPerSecond) {
+        return speedInMetersPerSecond*MTS_PER_SECOND_TO_KM_PER_HOUR;
     }
 
     private double determinateSizeBySpeed(double speed) {

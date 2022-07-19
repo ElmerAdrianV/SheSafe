@@ -74,15 +74,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final int SQUARE_CENTER_CENTER = 4;
     private static final int OUTSIDE_GRID = -1;
     private static final double SPEED_MAX_WALK = 8;
-    private static final double SQUARE_SIZE_WALK = 0.005;
+    private static final double SQUARE_SIZE_WALK = 0.003;
     private static final double SPEED_MAX_BIKE = 20;
-    private static final double SQUARE_SIZE_BIKE = 0.015;
-    private static final double SQUARE_SIZE_CAR = 0.045;
+    private static final double SQUARE_SIZE_BIKE = 0.009;
+    private static final double SQUARE_SIZE_CAR = 0.027;
     private static final int MOV_WALK = 0;
     private static final int MOV_BIKE = 1;
     private static final int MOV_CAR = 2;
     private static final double LAT_TO_KM = 110.574;
     private static final double LNG_TO_KM = 111.320;
+    private static final int ZOOM_WALK=18;
+    private static final int ZOOM_BIKE=17;
+    private static final int ZOOM_CAR=16;
+
 
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
@@ -189,7 +193,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         currentLocation = location;
                         queryFirstReports(SQUARE_SIZE_WALK);
                         onLocationChanged(location);
-                        displayLocation();
+                        displayLocation(ZOOM_WALK);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -212,21 +216,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double speedInKilometers = determinateSpeed(speedVector);
         double newSquareSize = determinateSizeBySpeed(speedInKilometers);
         int newWayToMove = determinateWayToMove(newSquareSize);
+        int zoom = determinateZoomByWayToMove(newWayToMove);
         if (oldWayMov != newWayToMove) {
-            resizeSquare(newSquareSize);
+            resizeSquare(newSquareSize,zoom);
         } else {
             ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
             int gridPosition = getGridPosition(actualLocation);
             if (gridPosition != SQUARE_CENTER_CENTER) {
-                recenterGrid(gridPosition, newSquareSize);
+                recenterGrid(gridPosition, newSquareSize,zoom);
             }
         }
     }
 
-    private void resizeSquare(double newSquareSize) {
+    private int determinateZoomByWayToMove(int wayToMove) {
+        switch(wayToMove){
+            case MOV_WALK:
+                return ZOOM_WALK;
+            case MOV_BIKE:
+                return ZOOM_BIKE;
+            default:
+                return ZOOM_CAR;
+        }
+    }
+
+    private void resizeSquare(double newSquareSize, int zoom) {
         removeMarkersFromGrid(markersInGrid);
         removeReportsFromWholeGrid();
         queryFirstReports(newSquareSize);
+        displayLocation(zoom);
     }
 
     private int determinateWayToMove(double squareSize) {
@@ -278,7 +295,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void recenterGrid(int newGridPosition, double newSquareSize) {
+    private void recenterGrid(int newGridPosition, double newSquareSize, int zoom) {
         if (newGridPosition == OUTSIDE_GRID) {
             removeMarkersFromGrid(markersInGrid);
             removeReportsFromWholeGrid();
@@ -301,6 +318,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             polygonGrid = getActualGridSquare(newSquareSize);
             requeryReports(columnDisplacement, rowDisplacement);
         }
+        displayLocation(zoom);
     }
 
     private int getGridPosition(ParseGeoPoint actualLocation) {
@@ -454,10 +472,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return gridPolygons;
     }
 
-    private void displayLocation() {
+    private void displayLocation(int zoom) {
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
             map.animateCamera(cameraUpdate);
         }
     }

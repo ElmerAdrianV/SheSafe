@@ -210,7 +210,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLongitude() - polygonGrid.get(0).getCoordinates().get(0).getLongitude();
         int oldWayMov = determinateWayToMove(oldSquareSize);
         double speedInKilometers = speedToKmPerHour(currentLocation.getSpeed());
-        Log.i(TAG, "onLocationChanged: "+speedInKilometers);
         double newSquareSize = determinateSizeBySpeed(speedInKilometers);
         int newWayToMove = determinateWayToMove(newSquareSize);
         int zoom = determinateZoomByWayToMove(newWayToMove);

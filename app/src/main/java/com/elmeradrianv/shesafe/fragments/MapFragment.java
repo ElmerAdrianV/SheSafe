@@ -78,8 +78,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final double SPEED_MAX_BIKE = 20;
     private static final double SQUARE_SIZE_BIKE = 0.015;
     private static final double SQUARE_SIZE_CAR = 0.045;
-    private static final double LAT_TO_KM=110.574;
-    private static final double LNG_TO_KM=111.320;
+    private static final double LAT_TO_KM = 110.574;
+    private static final double LNG_TO_KM = 111.320;
 
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
@@ -139,7 +139,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         markersInGrid = new HashMap<>();
         getMyLocation();
         startLocationUpdates();
-
         map.setOnMapLongClickListener(this);
     }
 
@@ -205,40 +204,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
         LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
+        double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLatitude() - polygonGrid.get(0).getCoordinates().get(0).getLatitude();
         double speedInKilometers = determinateSpeed(speedVector);
-        double squareSize=determinateSizeBySpeed(speedInKilometers);
+        double newSquareSize = determinateSizeBySpeed(speedInKilometers);
         ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
         int gridPosition = getGridPosition(actualLocation);
-        if (gridPosition != SQUARE_CENTER_CENTER) {
-            recenterGrid(gridPosition,squareSize);
+        if (gridPosition != SQUARE_CENTER_CENTER || newSquareSize!=oldSquareSize) {
+            recenterGrid(gridPosition, newSquareSize);
         }
     }
 
     private double determinateSpeed(LatLng speedVector) {
         double distance = Math.sqrt(
-                Math.pow(latitudeToKilometer(speedVector.latitude),2)
-                +
-                Math.pow(longitudeToKilometer(speedVector.latitude),2)
+                Math.pow(latitudeToKilometer(speedVector.latitude), 2)
+                        +
+                        Math.pow(longitudeToKilometer(speedVector.latitude), 2)
         );
-        return distance/UPDATE_INTERVAL_SECONDS;
+        return distance / UPDATE_INTERVAL_SECONDS;
     }
 
     private double longitudeToKilometer(double latitude) {
-        return LNG_TO_KM*Math.cos(latitude);
+        return LNG_TO_KM * Math.cos(latitude);
     }
 
     private double latitudeToKilometer(double latitude) {
-        return latitude*LAT_TO_KM;
+        return latitude * LAT_TO_KM;
     }
 
     private double determinateSizeBySpeed(double speed) {
-        if(speed<SPEED_MAX_WALK){
+        if (speed < SPEED_MAX_WALK) {
             return SQUARE_SIZE_WALK;
         }
-        if(speed<SPEED_MAX_BIKE){
+        if (speed < SPEED_MAX_BIKE) {
             return SQUARE_SIZE_BIKE;
-        }
-        else{
+        } else {
             return SQUARE_SIZE_CAR;
         }
     }

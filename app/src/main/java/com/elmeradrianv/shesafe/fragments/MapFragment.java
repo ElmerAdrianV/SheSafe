@@ -66,8 +66,8 @@ import permissions.dispatcher.NeedsPermission;
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
-    private static final int UPDATE_INTERVAL = 20000; //In milliseconds, 20s
-    private static final int UPDATE_INTERVAL_SECONDS = 20; //In milliseconds, 20s
+    private static final int UPDATE_INTERVAL = 36000; //In milliseconds, 36s
+    private static final double TO_KM_PER_HOUR = 1000;
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     private static final int SQUARE_GRID_LENGTH = 3;
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
@@ -207,7 +207,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
         LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
-        double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLatitude() - polygonGrid.get(0).getCoordinates().get(0).getLatitude();
+        double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLongitude() - polygonGrid.get(0).getCoordinates().get(0).getLongitude();
         int oldWayMov = determinateWayToMove(oldSquareSize);
         double speedInKilometers = determinateSpeed(speedVector);
         double newSquareSize = determinateSizeBySpeed(speedInKilometers);
@@ -242,12 +242,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
 
     private double determinateSpeed(LatLng speedVector) {
-        double distance = Math.sqrt(
-                Math.pow(latitudeToKilometer(speedVector.latitude), 2)
-                        +
-                        Math.pow(longitudeToKilometer(speedVector.latitude), 2)
-        );
-        return distance / UPDATE_INTERVAL_SECONDS;
+        if(Math.abs(speedVector.longitude)>0) {
+            double distance = Math.sqrt(
+                    Math.pow(latitudeToKilometer(speedVector.latitude), 2)
+                            +
+                            Math.pow(longitudeToKilometer(speedVector.latitude), 2)
+            );
+            return distance*TO_KM_PER_HOUR;
+        }
+        if( Math.abs(speedVector.longitude)>0){
+            double distance = Math.sqrt(
+                    Math.pow(latitudeToKilometer(speedVector.latitude), 2)
+            );
+            return distance*TO_KM_PER_HOUR;
+        }
+        return 0;
     }
 
     private double longitudeToKilometer(double latitude) {
@@ -382,7 +391,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
         }
     }
-
 
     private double positiveRemainder(double divisor, double dividend) {
         double quotient = Math.floor(dividend / divisor);

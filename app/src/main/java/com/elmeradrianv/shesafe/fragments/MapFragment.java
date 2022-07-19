@@ -73,7 +73,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
     private static final int SQUARE_CENTER_CENTER = 4;
     private static final int OUTSIDE_GRID = -1;
+    private static final double SPEED_MAX_WALK = 8;
     private static final double SQUARE_SIZE_WALK = 0.005;
+    private static final double SPEED_MAX_BIKE = 20;
     private static final double SQUARE_SIZE_BIKE = 0.015;
     private static final double SQUARE_SIZE_CAR = 0.045;
     private static final double LAT_TO_KM=110.574;
@@ -230,10 +232,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private double determinateSizeBySpeed(double speed) {
-        if(speed<5){
+        if(speed<SPEED_MAX_WALK){
             return SQUARE_SIZE_WALK;
         }
-        if(speed<15){
+        if(speed<SPEED_MAX_BIKE){
             return SQUARE_SIZE_BIKE;
         }
         else{
@@ -302,7 +304,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void requeryReports(int columnDisplacement, int rowDisplacement) {
         HashSet<Integer> squareKeys = obtainSquareKeysToQuery(columnDisplacement, rowDisplacement);
         for (Integer keySquare : squareKeys) {
-            Log.i(TAG, "requeryReports: " + keySquare);
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
             query.whereWithinPolygon("location", polygonGrid.get(keySquare));

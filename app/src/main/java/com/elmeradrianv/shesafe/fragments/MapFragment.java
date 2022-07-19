@@ -209,7 +209,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         double newSquareSize = determinateSizeBySpeed(speedInKilometers);
         ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
         int gridPosition = getGridPosition(actualLocation);
-        if (gridPosition != SQUARE_CENTER_CENTER || newSquareSize!=oldSquareSize) {
+        if (gridPosition != SQUARE_CENTER_CENTER || newSquareSize != oldSquareSize) {
             recenterGrid(gridPosition, newSquareSize);
         }
     }

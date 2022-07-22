@@ -162,6 +162,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 reportsInGrid.put(keySquare, new ArrayList<>());
                 reportsInGrid.get(keySquare).addAll(reportList);
                 showReports(keySquare, reportsInGrid.get(keySquare));
+                if(keySquare==SQUARE_CENTER_CENTER){
+                    focusReportsInTheCenter();
+                }
             });
         }
     }
@@ -169,10 +172,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void showReports(Integer keySquare, List<Report> reports) {
         markersInGrid.put(keySquare, new ArrayList<>());
         for (Report report : reports) {
+            int levelOfRisk = report.getTypeOfCrime().getLevelOfRisk();
             Marker marker = showMarker(report.getTypeOfCrime().getTag(),
                     report.getLocation().getLatitude(),
                     report.getLocation().getLongitude(),
-                    report.getTypeOfCrime().getLevelOfRisk());
+                    levelOfRisk);
             markersInGrid.get(keySquare).add(marker);
         }
     }
@@ -239,6 +243,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         removeReportsFromWholeGrid();
         queryFirstReports(newSquareSize);
         displayLocation(zoom);
+        focusReportsInTheCenter();
     }
 
     private int determinateWayToMove(double squareSize) {
@@ -252,6 +257,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
+    private void focusReportsInTheCenter(){
+        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
+            PinAnimation.focusTheReport(marker,getContext());
+        }
+    }
+    private void unfocusedReportsInTheCenter(){
+        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
+            PinAnimation.unfocusedTheReport(marker,getContext());
+        }
+    }
 
     private double speedToKmPerHour(double speedInMetersPerSecond) {
         return speedInMetersPerSecond * MTS_PER_SECOND_TO_KM_PER_HOUR;
@@ -274,6 +289,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             removeReportsFromWholeGrid();
             queryFirstReports(newSquareSize);
         } else {
+            unfocusedReportsInTheCenter();
             int newCenterGridPositionRow = newGridPosition % SQUARE_GRID_LENGTH;
             int newCenterGridPositionColumn = newGridPosition / SQUARE_GRID_LENGTH;
             int centerGridPositionRow = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;
@@ -290,6 +306,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             removeMarkersFromGrid(removeMarkers);
             polygonGrid = getActualGridSquare(newSquareSize);
             requeryReports(columnDisplacement, rowDisplacement);
+            focusReportsInTheCenter();
         }
         displayLocation(zoom);
     }
@@ -342,6 +359,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 reportsInGrid.put(keySquare, new ArrayList<>());
                 reportsInGrid.get(keySquare).addAll(reportList);
                 showReports(keySquare, reportsInGrid.get(keySquare));
+                if(keySquare==SQUARE_CENTER_CENTER){
+                    focusReportsInTheCenter();
+                }
             });
         }
     }
@@ -457,8 +477,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         LatLng reportLatLng = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(reportLatLng)
-                .title(title).icon(PinAnimation.getNewIconWithLevelOfRisk(levelOfRisk));
+                .title(title).icon(PinAnimation.getNewIconWithLevelOfRisk(levelOfRisk, getContext()));
         Marker marker = map.addMarker(markerOptions);
+        marker.setTag(levelOfRisk);
         PinAnimation.dropPinEffect(marker);
         return marker;
     }

@@ -13,7 +13,31 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 
 public class PinAnimation {
+    public static void focusTheReport(Marker marker, Context context) {
+        int height = 80;
+        int width = 80;
+        BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk((Integer) marker.getTag(), context);
+        Bitmap bitmap = bitmapdraw.getBitmap();
+        for (int i = 80; i <= 120; i++) {
+            height = i;
+            width = i;
+            Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+        }
+    }
 
+    public static void unfocusedTheReport(Marker marker, Context context) {
+        int height = 120;
+        int width = 120;
+        BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk((Integer) marker.getTag(), context);
+        Bitmap bitmap = bitmapdraw.getBitmap();
+        for (int i = 120; i >= 80; i--) {
+            height = i;
+            width = i;
+            Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+        }
+    }
     public static void dropPinEffect(Marker marker) {
         // Handler allows us to repeat a code block after a specified delay
         final android.os.Handler handler = new android.os.Handler();

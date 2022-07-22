@@ -66,12 +66,25 @@ import permissions.dispatcher.NeedsPermission;
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private static final String TAG = MapFragment.class.getSimpleName();
     private final static String KEY_LOCATION = "location";
-    private static final int UPDATE_INTERVAL = 60000; //In milliseconds, 60s
+    private static final int UPDATE_INTERVAL = 36000; //In milliseconds, 36s
     private static final int FASTEST_INTERVAL = 5000; //In milliseconds, 5s
     private static final int SQUARE_GRID_LENGTH = 3;
     private static final int SQUARE_GRID_3X3_COUNT = SQUARE_GRID_LENGTH * SQUARE_GRID_LENGTH;
     private static final int SQUARE_CENTER_CENTER = 4;
     private static final int OUTSIDE_GRID = -1;
+    private static final double SPEED_MAX_WALK = 8;
+    private static final double SQUARE_SIZE_WALK = 0.003;
+    private static final double SPEED_MAX_BIKE = 20;
+    private static final double SQUARE_SIZE_BIKE = 0.009;
+    private static final double SQUARE_SIZE_CAR = 0.027;
+    private static final int MOV_WALK = 0;
+    private static final int MOV_BIKE = 1;
+    private static final int MOV_CAR = 2;
+    private static final double MTS_PER_SECOND_TO_KM_PER_HOUR = 3.6;
+    private static final int ZOOM_WALK = 18;
+    private static final int ZOOM_BIKE = 17;
+    private static final int ZOOM_CAR = 16;
+
 
     private Location currentLocation;
     private HashMap<Integer, ParsePolygon> polygonGrid;
@@ -131,12 +144,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         markersInGrid = new HashMap<>();
         getMyLocation();
         startLocationUpdates();
-
         map.setOnMapLongClickListener(this);
     }
 
-    private void queryFirstReports() {
-        polygonGrid = getActualGridSquare();
+    private void queryFirstReports(double squareSize) {
+        polygonGrid = getActualGridSquare(squareSize);
         for (Integer keySquare : polygonGrid.keySet()) {
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
@@ -177,9 +189,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     if (location != null) {
                         //firstDisplayLocation;
                         currentLocation = location;
-                        queryFirstReports();
+                        queryFirstReports(SQUARE_SIZE_WALK);
                         onLocationChanged(location);
-                        displayLocation();
+                        displayLocation(ZOOM_WALK);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -193,22 +205,74 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (location == null) {
             return;
         }
-        double longitudePFL = location.getLongitude() - currentLocation.getLongitude();
-        double latitudePFL = location.getLatitude() - currentLocation.getLatitude();
         currentLocation = location;
-        LatLng speedVector = new LatLng(latitudePFL, longitudePFL);
-        ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
-        int gridPosition = getGridPosition(actualLocation);
-        if (gridPosition != SQUARE_CENTER_CENTER) {
-            recenterGrid(gridPosition);
+        double oldSquareSize = polygonGrid.get(0).getCoordinates().get(1).getLongitude() - polygonGrid.get(0).getCoordinates().get(0).getLongitude();
+        int oldWayMov = determinateWayToMove(oldSquareSize);
+        double speedInKilometers = speedToKmPerHour(currentLocation.getSpeed());
+        double newSquareSize = determinateSizeBySpeed(speedInKilometers);
+        int newWayToMove = determinateWayToMove(newSquareSize);
+        int zoom = determinateZoomByWayToMove(newWayToMove);
+        if (oldWayMov != newWayToMove) {
+            resizeSquare(newSquareSize, zoom);
+        } else {
+            ParseGeoPoint actualLocation = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+            int gridPosition = getGridPosition(actualLocation);
+            if (gridPosition != SQUARE_CENTER_CENTER) {
+                recenterGrid(gridPosition, newSquareSize, zoom);
+            }
         }
     }
 
-    private void recenterGrid(int newGridPosition) {
+    private int determinateZoomByWayToMove(int wayToMove) {
+        switch (wayToMove) {
+            case MOV_WALK:
+                return ZOOM_WALK;
+            case MOV_BIKE:
+                return ZOOM_BIKE;
+            default:
+                return ZOOM_CAR;
+        }
+    }
+
+    private void resizeSquare(double newSquareSize, int zoom) {
+        removeMarkersFromGrid(markersInGrid);
+        removeReportsFromWholeGrid();
+        queryFirstReports(newSquareSize);
+        displayLocation(zoom);
+    }
+
+    private int determinateWayToMove(double squareSize) {
+        if (Math.abs(squareSize - SQUARE_SIZE_WALK) <= 0.001) {
+            return MOV_WALK;
+        }
+        if (Math.abs(squareSize - SQUARE_SIZE_BIKE) <= 0.001) {
+            return MOV_BIKE;
+        } else {
+            return MOV_CAR;
+        }
+    }
+
+
+    private double speedToKmPerHour(double speedInMetersPerSecond) {
+        return speedInMetersPerSecond * MTS_PER_SECOND_TO_KM_PER_HOUR;
+    }
+
+    private double determinateSizeBySpeed(double speed) {
+        if (speed < SPEED_MAX_WALK) {
+            return SQUARE_SIZE_WALK;
+        }
+        if (speed < SPEED_MAX_BIKE) {
+            return SQUARE_SIZE_BIKE;
+        } else {
+            return SQUARE_SIZE_CAR;
+        }
+    }
+
+    private void recenterGrid(int newGridPosition, double newSquareSize, int zoom) {
         if (newGridPosition == OUTSIDE_GRID) {
             removeMarkersFromGrid(markersInGrid);
             removeReportsFromWholeGrid();
-            queryFirstReports();
+            queryFirstReports(newSquareSize);
         } else {
             int newCenterGridPositionRow = newGridPosition % SQUARE_GRID_LENGTH;
             int newCenterGridPositionColumn = newGridPosition / SQUARE_GRID_LENGTH;
@@ -218,15 +282,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             int rowDisplacement = newCenterGridPositionRow - centerGridPositionRow;
             HashMap<Integer, ArrayList<Marker>> removeMarkers = new HashMap<>();
             if (columnDisplacement != 0) {
-                pushGridVertical(columnDisplacement, removeMarkers);
+                pushGridHorizontal(columnDisplacement, removeMarkers);
             }
             if (rowDisplacement != 0) {
-                pushGridHorizontal(rowDisplacement, removeMarkers);
+                pushGridVertical(rowDisplacement, removeMarkers);
             }
             removeMarkersFromGrid(removeMarkers);
-            polygonGrid = getActualGridSquare();
+            polygonGrid = getActualGridSquare(newSquareSize);
             requeryReports(columnDisplacement, rowDisplacement);
         }
+        displayLocation(zoom);
     }
 
     private int getGridPosition(ParseGeoPoint actualLocation) {
@@ -238,10 +303,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return OUTSIDE_GRID;
     }
 
-    private void pushGridHorizontal(int rowDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+    private void pushGridVertical(int columnDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
         for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
             int oldGridRow = keySquare / SQUARE_GRID_LENGTH;
-            int newKeySquarePosition = keySquare - rowDisplacement;
+            int newKeySquarePosition = keySquare - columnDisplacement;
             int newGridRow = newKeySquarePosition / SQUARE_GRID_LENGTH;
             if (newGridRow == oldGridRow && 0 <= newKeySquarePosition && newKeySquarePosition <= 9) {
                 polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
@@ -251,9 +316,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void pushGridVertical(int columnDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
+    private void pushGridHorizontal(int rowDisplacement, HashMap<Integer, ArrayList<Marker>> removeMarkers) {
         for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
-            int newKeySquarePosition = keySquare - SQUARE_GRID_LENGTH * columnDisplacement;
+            int newKeySquarePosition = keySquare - SQUARE_GRID_LENGTH * rowDisplacement;
             if (0 <= newKeySquarePosition && newKeySquarePosition <= 9) {
                 polygonGrid.replace(newKeySquarePosition, polygonGrid.get(keySquare));
                 markersInGrid.replace(newKeySquarePosition, markersInGrid.get(keySquare));
@@ -265,7 +330,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void requeryReports(int columnDisplacement, int rowDisplacement) {
         HashSet<Integer> squareKeys = obtainSquareKeysToQuery(columnDisplacement, rowDisplacement);
         for (Integer keySquare : squareKeys) {
-            Log.i(TAG, "requeryReports: " + keySquare);
             ParseQuery<Report> query = ParseQuery.getQuery(Report.class);
             query.include(Report.TYPE_OF_CRIME_KEY);
             query.whereWithinPolygon("location", polygonGrid.get(keySquare));
@@ -319,16 +383,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-
     private double positiveRemainder(double divisor, double dividend) {
         double quotient = Math.floor(dividend / divisor);
         return dividend - divisor * quotient;
     }
 
-    private HashMap<Integer, ParsePolygon> getActualGridSquare() {
+    private HashMap<Integer, ParsePolygon> getActualGridSquare(double squareSize) {
         HashMap<Integer, ArrayList<ParseGeoPoint>> grid = new HashMap<>();
-        //squareSize is a "debug number and it will change depends of the speedVector"
-        double squareSize = 0.01;
         // abbr. CS means central square
         double cornerLatitudeCS = currentLocation.getLatitude() - positiveRemainder(squareSize, currentLocation.getLatitude());
         double cornerLongitudeCS = currentLocation.getLongitude() - positiveRemainder(squareSize, currentLocation.getLongitude());
@@ -384,10 +445,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return gridPolygons;
     }
 
-    private void displayLocation() {
+    private void displayLocation(int zoom) {
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
             map.animateCamera(cameraUpdate);
         }
     }

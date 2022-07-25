@@ -43,8 +43,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.parse.ParseGeoPoint;
 import com.parse.ParsePolygon;
 import com.parse.ParseQuery;
@@ -162,7 +160,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 reportsInGrid.put(keySquare, new ArrayList<>());
                 reportsInGrid.get(keySquare).addAll(reportList);
                 showReports(keySquare, reportsInGrid.get(keySquare));
-                if(keySquare==SQUARE_CENTER_CENTER){
+                if (keySquare == SQUARE_CENTER_CENTER) {
                     focusReportsInTheCenter();
                 }
             });
@@ -257,14 +255,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void focusReportsInTheCenter(){
-        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
-            PinAnimation.focusTheReport(marker,getContext());
+    private void focusReportsInTheCenter() {
+        for (Marker marker : markersInGrid.get(SQUARE_CENTER_CENTER)) {
+            PinAnimation.focusTheReport(marker, getContext());
         }
     }
-    private void unfocusReportsInTheCenter(){
-        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
-            PinAnimation.unfocusedTheReport(marker,getContext());
+
+    private void unfocusReportsInTheCenter() {
+        for (Marker marker : markersInGrid.get(SQUARE_CENTER_CENTER)) {
+            PinAnimation.unfocusedTheReport(marker, getContext());
         }
     }
 
@@ -359,7 +358,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 reportsInGrid.put(keySquare, new ArrayList<>());
                 reportsInGrid.get(keySquare).addAll(reportList);
                 showReports(keySquare, reportsInGrid.get(keySquare));
-                if(keySquare==SQUARE_CENTER_CENTER){
+                if (keySquare == SQUARE_CENTER_CENTER) {
                     focusReportsInTheCenter();
                 }
             });
@@ -425,7 +424,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
         for (int keySquare = 0; keySquare < SQUARE_GRID_3X3_COUNT; keySquare++) {
             grid.put(keySquare, new ArrayList<>());
-            PolygonOptions polygonOptions = new PolygonOptions();
             int gridCornerStartColumn = keySquare % SQUARE_GRID_LENGTH;
             int gridCornerStartRow = keySquare / SQUARE_GRID_LENGTH;
             for (int i = gridCornerStartColumn; i < gridCornerStartColumn + 2; i++) {
@@ -436,7 +434,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
                         );
-                        polygonOptions.add(gridCorners[i][j]);
                     }
                 } else {
                     for (int j = gridCornerStartRow + 1; j >= gridCornerStartRow; j--) {
@@ -444,12 +441,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 gridCorners[i][j].latitude,
                                 gridCorners[i][j].longitude)
                         );
-                        polygonOptions.add(gridCorners[i][j]);
                     }
                 }
             }
-            polygonOptions.add(gridCorners[gridCornerStartColumn][gridCornerStartRow]);
-            Polygon polygon = map.addPolygon(polygonOptions);
         }
         return getGridPolygons(grid);
     }

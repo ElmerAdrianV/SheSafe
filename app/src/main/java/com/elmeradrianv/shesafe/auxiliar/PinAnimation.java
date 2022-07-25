@@ -3,6 +3,7 @@ package com.elmeradrianv.shesafe.auxiliar;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.animation.BounceInterpolator;
 
@@ -13,16 +14,36 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 
 public class PinAnimation {
+    private static final long ICON_CHANGE_INTERVAL_MS = 200;
+    private static final int NORMAL_MARKER_HEIGHT = 70;
+    private static final int NORMAL_MARKER_WIDTH = 70;
+    private static final int BIG_MARKER_HEIGHT = 130;
+    private static final int BIG_MARKER_WIDTH = 130;
+
     public static void focusTheReport(Marker marker, Context context) {
-        int height = 80;
-        int width = 80;
+        int height = NORMAL_MARKER_HEIGHT;
+        int width = NORMAL_MARKER_WIDTH;
+        final long start = SystemClock.uptimeMillis();
+        final long duration = 1500;
+        Handler handler = new Handler();
         BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk((Integer) marker.getTag(), context);
         Bitmap bitmap = bitmapdraw.getBitmap();
-        for (int i = 80; i <= 120; i++) {
+        for (int i = NORMAL_MARKER_HEIGHT; i <= BIG_MARKER_HEIGHT; i++) {
             height = i;
             width = i;
             Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
-            marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = Math.max(
+                            1 - ((float) elapsed / duration), 0);
+                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+                    if (t > 0.0) {
+                        handler.postDelayed(this, 15);
+                    }
+                }
+            });
         }
     }
 
@@ -38,9 +59,10 @@ public class PinAnimation {
             marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
         }
     }
+
     public static void dropPinEffect(Marker marker) {
         // Handler allows us to repeat a code block after a specified delay
-        final android.os.Handler handler = new android.os.Handler();
+        final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         final long duration = 1500;
         // Use the bounce interpolator
@@ -68,11 +90,10 @@ public class PinAnimation {
     }
 
     public static BitmapDescriptor getNewIconWithLevelOfRisk(int levelOfRisk, Context context) {
-        int height = 80;
-        int width = 80;
+
         BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk(levelOfRisk, context);
         Bitmap bitmap = bitmapdraw.getBitmap();
-        Bitmap normalMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
+        Bitmap normalMarker = Bitmap.createScaledBitmap(bitmap, NORMAL_MARKER_WIDTH, NORMAL_MARKER_HEIGHT, false);
         return BitmapDescriptorFactory.fromBitmap(normalMarker);
     }
 

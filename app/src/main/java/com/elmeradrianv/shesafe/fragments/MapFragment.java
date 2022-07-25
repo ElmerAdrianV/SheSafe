@@ -262,11 +262,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             PinAnimation.focusTheReport(marker,getContext());
         }
     }
-    private void unfocusedReportsInTheCenter(){
-        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
-            PinAnimation.unfocusedTheReport(marker,getContext());
-        }
-    }
+//    private void unfocusedReportsInTheCenter(){
+//        for(Marker marker: markersInGrid.get(SQUARE_CENTER_CENTER)){
+//            PinAnimation.unfocusedTheReport(marker,getContext());
+//        }
+//    }
 
     private double speedToKmPerHour(double speedInMetersPerSecond) {
         return speedInMetersPerSecond * MTS_PER_SECOND_TO_KM_PER_HOUR;
@@ -289,7 +289,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             removeReportsFromWholeGrid();
             queryFirstReports(newSquareSize);
         } else {
-            unfocusedReportsInTheCenter();
+            //unfocusedReportsInTheCenter();
             int newCenterGridPositionRow = newGridPosition % SQUARE_GRID_LENGTH;
             int newCenterGridPositionColumn = newGridPosition / SQUARE_GRID_LENGTH;
             int centerGridPositionRow = SQUARE_CENTER_CENTER % SQUARE_GRID_LENGTH;

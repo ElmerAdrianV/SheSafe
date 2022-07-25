@@ -64,8 +64,8 @@ public class PinAnimation {
                     long elapsed = SystemClock.uptimeMillis() - start;
                     float t = Math.max(
                             1 - ((float) elapsed / DURATION), 0);
-                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(smallerMarker));
                     if (t > 0.0) {
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(smallerMarker));
                         handler.postDelayed(this, 15);
                     }
                 }

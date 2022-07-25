@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.animation.BounceInterpolator;
 
 import com.elmeradrianv.shesafe.R;
@@ -31,19 +32,15 @@ public class PinAnimation {
         for (int i = NORMAL_MARKER_HEIGHT; i <= BIG_MARKER_HEIGHT; i++) {
             height = i;
             width = i;
+            final int copy_of_i=i;
             Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = Math.max(
-                            1 - ((float) elapsed / DURATION), 0);
-                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
-                    if (t > 0.0) {
-                        handler.postDelayed(this, 15);
-                    }
-                }
-            });
+            handler.postDelayed(() -> {
+                Log.e("TAG", String.valueOf(copy_of_i));
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = Math.max(
+                        1 - ((float) elapsed / DURATION), 0);
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+            }, 300);
         }
     }
 
@@ -58,18 +55,12 @@ public class PinAnimation {
             height = i;
             width = i;
             Bitmap smallerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = Math.max(
-                            1 - ((float) elapsed / DURATION), 0);
-                    if (t > 0.0) {
-                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(smallerMarker));
-                        handler.postDelayed(this, 15);
-                    }
-                }
-            });
+            handler.postDelayed(() -> {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = Math.max(
+                        1 - ((float) elapsed / DURATION), 0);
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(smallerMarker));
+            }, 300);
         }
     }
 

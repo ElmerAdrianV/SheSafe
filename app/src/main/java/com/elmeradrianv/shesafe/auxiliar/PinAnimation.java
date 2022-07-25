@@ -19,12 +19,12 @@ public class PinAnimation {
     private static final int NORMAL_MARKER_WIDTH = 70;
     private static final int BIG_MARKER_HEIGHT = 130;
     private static final int BIG_MARKER_WIDTH = 130;
+    private static final long DURATION = 1500;
 
     public static void focusTheReport(Marker marker, Context context) {
         int height = NORMAL_MARKER_HEIGHT;
         int width = NORMAL_MARKER_WIDTH;
         final long start = SystemClock.uptimeMillis();
-        final long duration = 1500;
         Handler handler = new Handler();
         BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk((Integer) marker.getTag(), context);
         Bitmap bitmap = bitmapdraw.getBitmap();
@@ -37,7 +37,7 @@ public class PinAnimation {
                 public void run() {
                     long elapsed = SystemClock.uptimeMillis() - start;
                     float t = Math.max(
-                            1 - ((float) elapsed / duration), 0);
+                            1 - ((float) elapsed / DURATION), 0);
                     marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
                     if (t > 0.0) {
                         handler.postDelayed(this, 15);
@@ -48,15 +48,28 @@ public class PinAnimation {
     }
 
     public static void unfocusedTheReport(Marker marker, Context context) {
-        int height = 120;
-        int width = 120;
+        int height = BIG_MARKER_HEIGHT;
+        int width = BIG_MARKER_WIDTH;
+        final long start = SystemClock.uptimeMillis();
+        Handler handler = new Handler();
         BitmapDrawable bitmapdraw = getBitmapDrawableColorByLevelOfRisk((Integer) marker.getTag(), context);
         Bitmap bitmap = bitmapdraw.getBitmap();
-        for (int i = 120; i >= 80; i--) {
+        for (int i = BIG_MARKER_HEIGHT; i >= NORMAL_MARKER_HEIGHT; i--) {
             height = i;
             width = i;
-            Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
-            marker.setIcon(BitmapDescriptorFactory.fromBitmap(biggerMarker));
+            Bitmap smallerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = Math.max(
+                            1 - ((float) elapsed / DURATION), 0);
+                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(smallerMarker));
+                    if (t > 0.0) {
+                        handler.postDelayed(this, 15);
+                    }
+                }
+            });
         }
     }
 

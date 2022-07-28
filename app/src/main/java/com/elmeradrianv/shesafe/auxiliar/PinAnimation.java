@@ -35,7 +35,6 @@ public class PinAnimation {
             final int copy_of_i=i;
             Bitmap biggerMarker = Bitmap.createScaledBitmap(bitmap, width, height, false);
             handler.postDelayed(() -> {
-                Log.e("TAG", String.valueOf(copy_of_i));
                 long elapsed = SystemClock.uptimeMillis() - start;
                 float t = Math.max(
                         1 - ((float) elapsed / DURATION), 0);
